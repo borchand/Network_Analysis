@@ -49,7 +49,7 @@ def get_neighborhood(G, node, depth=1):
 
 def main():
   #get data
-  stockdf = pd.read_csv('AllfileBig.csv', index_col=0)
+  stockdf = pd.read_csv('../data/AllfileBig.csv', index_col=0)
   startlen = len(stockdf.columns)
   stockdf = stockdf.dropna(axis=1, how='all')
   print(f'dropped {startlen-len(stockdf.columns)} columns')
@@ -74,6 +74,7 @@ def main():
     sub = get_neighborhood(Gmst, ticker, 4)
     H = Gmst.subgraph(sub)
     nx.draw(H, with_labels=True, ax=ax[i])
+  plt.show()
   
  
 
