@@ -96,12 +96,6 @@ def main(thresh):
     nx.draw(H, with_labels=True, ax=ax[i])
   plt.show()
 
-  removelst = [k for k,v in sorted(G.degree, key=lambda x: x[1], reverse=True)[:10]]
-  G.remove_nodes_from(removelst)
-
-  #calc network statistics
-  nx.draw_spring(G)
-
   #draw network with colored connected components
   pos = nx.spring_layout(G)
   colorlist = [ 'r', 'g', 'b', 'c', 'm', 'y', 'k' ]
