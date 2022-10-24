@@ -21,7 +21,10 @@ def get_corr_matrix(df, threshold=0.9):
       ndarray: correlation matrix
   """
   A = df.corr().to_numpy()
-  A = np.where(abs(A) > .9, A, 0)
+
+  if threshold != 0:
+    A = np.where(abs(A) > threshold, A, 0)
+
   A = np.where(A == 1, 0, A)
   return A
 
@@ -47,37 +50,69 @@ def get_neighborhood(G, node, depth=1):
   else:
       return {node}.union(*[get_neighborhood(G, neighbor, depth-1) for neighbor in G.neighbors(node)])
 
-def main():
+thresh = 0
+def main(thresh):
   #get data
+
   stockdf = pd.read_csv('../data/AllfileBig.csv', index_col=0)
   startlen = len(stockdf.columns)
   stockdf = stockdf.dropna(axis=1, how='all')
   print(f'dropped {startlen-len(stockdf.columns)} columns')
+  
+
 
   #create mst from correlation matrix
-  A = get_corr_matrix(stockdf, threshold=0) # get correlation matrix
-  dist = np.sqrt(2*(1-A)) # calc distance matrix
-  mst = minimum_spanning_tree(dist) # get sparse mst matrix
-  Gmst = nx.from_scipy_sparse_matrix(mst) # convert to graph
+  A = get_corr_matrix(stockdf, threshold=thresh) # get correlation matrix
+  if thresh == 0:
+    print('creating mst from correlation matrix')
+    dist = np.sqrt(2*(1-A)) # calc distance matrix
+    mst = minimum_spanning_tree(dist) # get sparse mst matrix
+    G = nx.from_scipy_sparse_matrix(mst) # convert to graph
+  else:
+    print('creating graph from correlation matrix')
+    G = nx.from_numpy_matrix(A, create_using=nx.Graph) # convert to graph
 
-  #relabel graph
-  Gmst = relabel_graph(Gmst, stockdf.columns)
+  G = relabel_graph(G, stockdf.columns) # relabel nodes
 
-
-  Gmst.remove_node('DOUG') # higly correlated with alot of stocks
   
+  #get weights of edges
+  applList = [(i, G.edges['AAPL', i]['weight']) for i in G.neighbors('AAPL')]
+
+  #sort list
+  applList.sort(key=lambda x: x[1], reverse=True)
+  applList = applList[:10]
+  applList
+
+  G.remove_node('DOUG') # higly correlated with alot of stocks
+
+  sttring = 'hello'  
   #draw graphs
   tickerlst = 'AAPL,AMZN,GOOG,MSFT'.split(',')
   fig, ax = plt.subplots(1,4, figsize=(20,10))
   for i, ticker in enumerate(tickerlst):
     ax[i].set_title(ticker)
-    sub = get_neighborhood(Gmst, ticker, 4)
-    H = Gmst.subgraph(sub)
+    sub = get_neighborhood(G, ticker, 4)
+    H = G.subgraph(sub)
     nx.draw(H, with_labels=True, ax=ax[i])
   plt.show()
-  
- 
 
+  removelst = [k for k,v in sorted(G.degree, key=lambda x: x[1], reverse=True)[:10]]
+  G.remove_nodes_from(removelst)
+
+  #calc network statistics
+  nx.draw_spring(G)
+
+  #draw network with colored connected components
+  pos = nx.spring_layout(G)
+  colorlist = [ 'r', 'g', 'b', 'c', 'm', 'y', 'k' ]
+  wcc = nx.connected_components( G )
+  setLst = list(wcc) 
+  plt.figure(figsize = (50,30))
+  for index, sg in enumerate(setLst):
+    nx.draw(G.subgraph(sg), pos= pos, node_color= colorlist[index % 7], with_labels=True)
+
+
+  
 if __name__ == "__main__":
-  main()
+  main(thresh)
   
