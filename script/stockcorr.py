@@ -11,7 +11,8 @@ from scipy.sparse.csgraph import minimum_spanning_tree
 
 
 def get_corr_matrix(df, threshold=0.9):
-  """Calculate correlation given between column in dataframe
+  """Calculate correlation given between column in dataframe.
+  To include all columns, set threshold to 0, fx when constructing MST
 
   Args:
       df (DataFrame): Input dateframe
@@ -21,6 +22,7 @@ def get_corr_matrix(df, threshold=0.9):
       ndarray: correlation matrix
   """
   A = df.corr().to_numpy()
+  print(f'A has {np.isnan(A).sum()} nan values')
 
   if threshold != 0:
     A = np.where(abs(A) > threshold, A, 0)
@@ -60,7 +62,7 @@ def main(thresh):
   print(f'dropped {startlen-len(stockdf.columns)} columns')
   
 
-
+  stockdf.shape
   #create mst from correlation matrix
   A = get_corr_matrix(stockdf, threshold=thresh) # get correlation matrix
   if thresh == 0:
@@ -74,7 +76,8 @@ def main(thresh):
 
   G = relabel_graph(G, stockdf.columns) # relabel nodes
 
-  
+  #count nan in dist
+  print(f'number of nan in dist: {np.isnan(dist).sum()}')
   #get weights of edges
   applList = [(i, G.edges['AAPL', i]['weight']) for i in G.neighbors('AAPL')]
 
@@ -96,15 +99,22 @@ def main(thresh):
     nx.draw(H, with_labels=True, ax=ax[i])
   plt.show()
 
+  # remove singletons
+  G.remove_nodes_from(list(nx.isolates(G)))
   #draw network with colored connected components
   pos = nx.spring_layout(G)
-  colorlist = [ 'r', 'g', 'b', 'c', 'm', 'y', 'k' ]
+  colorlist = [ 'r', 'g', 'b', 'c', 'm', 'y', 'brown', 'orange', 'purple' ]
   wcc = nx.connected_components( G )
   setLst = list(wcc) 
   plt.figure(figsize = (50,30))
   for index, sg in enumerate(setLst):
     nx.draw(G.subgraph(sg), pos= pos, node_color= colorlist[index % 7], with_labels=True)
 
+  setLst.sort(key=len, reverse=True)
+  fig, ax = plt.subplots(5,5, figsize=(50,50))
+  for i, sg in enumerate(setLst[:25]):
+    nx.draw(G.subgraph(sg), pos= pos, node_color= colorlist[i % 7], with_labels=True, ax=ax[i//5, i%5])
+  plt.show()
 
   
 if __name__ == "__main__":
