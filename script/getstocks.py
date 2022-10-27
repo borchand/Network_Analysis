@@ -13,7 +13,7 @@ start = datetime.datetime(2018, 1, 1)
 end = datetime.datetime(2022, 1, 1)
 date = pd.date_range(start, end)
 date = pd.DataFrame(date)
-inputDf = pd.read_csv('tickers.csv')
+inputDf = pd.read_csv('data/tickers.csv')
 tickers = inputDf[f'Symbol'].tolist()
 
 def chunks(lst, n):
@@ -25,12 +25,12 @@ lst = []
 def getstocks(tickers):
     #download stock data
     s = time()
-    stocks = web.get_data_yahoo(tickers, start, end)['Adj Close']
+    stocks = web.get_data_yahoo(tickers, start, end)['Close']
     stocks = pd.DataFrame(stocks)
     
     ## merge the stocks and date on date
     
-    stocks = pd.merge(date, stocks, how='left', left_on=0, right_on='Date').rename(columns={'Adj Close':tickers})
+    stocks = pd.merge(date, stocks, how='left', left_on=0, right_on='Date').rename(columns={'Close':tickers})
     
     #print(stocks)
     #date = date.join(date, on = 'Date', as_index = f'{tickers}', lsuffix = '_caller', rsuffix = '_other')
@@ -46,6 +46,6 @@ for tickerchunk in tqdm(range(len(tickers))):
         pass
 
 
-date.to_csv('AllfileBig.csv',index=True, header=True, chunksize=100)
+date.to_csv('ClosefileBig.csv',index=True, header=True, chunksize=100)
 
 
