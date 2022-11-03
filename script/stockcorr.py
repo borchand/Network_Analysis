@@ -56,7 +56,7 @@ thresh = 0
 def main(thresh):
   #get data
 
-  stockdf = pd.read_csv('../data/AllfileBig.csv', index_col=0)
+  stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv', index_col=0)
   startlen = len(stockdf.columns)
   stockdf = stockdf.dropna(axis=1, how='all')
   print(f'dropped {startlen-len(stockdf.columns)} columns')
@@ -78,23 +78,15 @@ def main(thresh):
 
   #count nan in dist
   print(f'number of nan in dist: {np.isnan(dist).sum()}')
-  #get weights of edges
-  applList = [(i, G.edges['AAPL', i]['weight']) for i in G.neighbors('AAPL')]
-
-  #sort list
-  applList.sort(key=lambda x: x[1], reverse=True)
-  applList = applList[:10]
-  applList
-
-  G.remove_node('DOUG') # higly correlated with alot of stocks
-
-  sttring = 'hello'  
+  #get list of degrees sorted
+  deg = sorted(G.degree, key=lambda x: x[1], reverse=True)
+  deg
   #draw graphs
   tickerlst = 'AAPL,AMZN,GOOG,MSFT'.split(',')
   fig, ax = plt.subplots(1,4, figsize=(20,10))
   for i, ticker in enumerate(tickerlst):
     ax[i].set_title(ticker)
-    sub = get_neighborhood(G, ticker, 4)
+    sub = get_neighborhood(G, ticker, 3)
     H = G.subgraph(sub)
     nx.draw(H, with_labels=True, ax=ax[i])
   plt.show()
@@ -106,17 +98,25 @@ def main(thresh):
   colorlist = [ 'r', 'g', 'b', 'c', 'm', 'y', 'brown', 'orange', 'purple' ]
   wcc = nx.connected_components( G )
   setLst = list(wcc) 
+  len(setLst)
   plt.figure(figsize = (50,30))
   for index, sg in enumerate(setLst):
-    nx.draw(G.subgraph(sg), pos= pos, node_color= colorlist[index % 7], with_labels=True)
-
-  setLst.sort(key=len, reverse=True)
-  fig, ax = plt.subplots(5,5, figsize=(50,50))
-  for i, sg in enumerate(setLst[:25]):
-    nx.draw(G.subgraph(sg), pos= pos, node_color= colorlist[i % 7], with_labels=True, ax=ax[i//5, i%5])
+    #draw with orange color text
+    nx.draw(G.subgraph(sg), pos= pos, node_color= colorlist[index % 7], with_labels=True, font_color='orange', font_size=20)
   plt.show()
 
-  
+  #draw network with colored communities
+  pos = nx.spring_layout(G)
+  colorlist = [ 'r', 'g', 'b', 'c', 'm', 'y', 'brown', 'orange', 'purple' ]
+  communities = girvan_newman(G)
+  setLst = list(next(communities))
+  len(setLst)
+  plt.figure(figsize = (50,30))
+  for index, sg in enumerate(setLst):
+    #draw with orange color text
+    nx.draw(G.subgraph(sg), pos= pos, node_color= colorlist[index % 7], with_labels=True)
+  plt.show()
+
 if __name__ == "__main__":
   main(thresh)
   
