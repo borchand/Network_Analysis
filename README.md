@@ -8,4 +8,5 @@ Download dataset from [here](https://www.kaggle.com/datasets/paultimothymooney/s
 - Run clean.py
 
 ## Update all_data.csv and stockdf.csv
-- run clean.py t
+- run
+```clean.py t```
