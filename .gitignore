@@ -197,3 +197,5 @@ cython_debug/
 
 data/stock_market_data
 .DS_Store
+
+malthe-eda.ipynb
