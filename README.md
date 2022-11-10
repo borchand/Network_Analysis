@@ -5,8 +5,7 @@ Download dataset from [here](https://www.kaggle.com/datasets/paultimothymooney/s
 ## Getting started
 - Download dataset
 - The downloaded stock_market_data folder should be in the data folder
-- Run clean.py
+- Run ```clean.py```
 
 ## Update all_data.csv and stockdf.csv
-- run
-```clean.py t```
+- run ```clean.py t```
