@@ -1,7 +1,10 @@
-import pandas as pd
+import datetime
 import glob
-from tqdm import tqdm
 import sys
+
+import pandas as pd
+from tqdm import tqdm
+
 
 def find_ETFs(datasets):
     x = set()
@@ -23,9 +26,9 @@ def find_ETFs(datasets):
 
 
 def merge_data_to_csv(datasets, etfs):
-
+    cut_off_date = datetime.datetime(2005, 1, 1)
     dataframes = []
-
+    tickers = set()
     for dataset in datasets:
         print("Downloading %s" % dataset + "...")
         # Get all files from /data/stock_market_data/dataset/csv
@@ -34,10 +37,14 @@ def merge_data_to_csv(datasets, etfs):
         # For each file in all_files, read the csv file and append it to a list
         df_list = []
         for file in tqdm(all_files):
-            etf = file.split("/")[-1].split(".")[0]
-            if not etf in etfs:
+            symbol = file.split("/")[-1].split(".")[0]
+            if symbol not in etfs or symbol not in tickers:
                 df = pd.read_csv(file)
+                df["Date"] = pd.to_datetime(df["Date"], dayfirst=True)
+                # cut off data before datetime of 2005-01-01
+                df = df[df["Date"] >= cut_off_date]
                 df_list.append(df)
+                tickers.add(symbol)
 
         # Create a dataframe with all the data, including a column with the file name
         print("Concatenating %s" % dataset + "...")
@@ -55,19 +62,16 @@ def merge_data_to_csv(datasets, etfs):
     # Load data
     all_df = pd.concat([dataframe for dataframe in dataframes])
 
-    print("Deleting duplicate tickers...")
-    # Remove duplicate rows
-    df = all_df.drop_duplicates()
-
     print("Remove delisted...")
     nan_tickers = df[df['ticker'].isna()]['ticker'].unique()
 
     df = df[~df['ticker'].isin(nan_tickers)]
 
-    print("Printing to all_data.csv...")
+    print("Saving to all_data.csv...")
     # print df to csv
     df.to_csv('./data/stock_market_data/all_data.csv')
     return df
+
 
 def transform_data(stockdf):
     print("Transform dataframe...")
@@ -80,7 +84,6 @@ def transform_data(stockdf):
     stockdf = stockdf.pivot_table(index='Date', columns='ticker', values='Close')
 
     return stockdf
-
 
 
 def adding_market_index(df):
@@ -98,7 +101,7 @@ def adding_market_index(df):
     return x
 
 def save_to_csv(stockdf):
-    print("Print to stockdf.csv...")
+    print("Saving to stockdf.csv...")
     #print to csv
     stockdf.to_csv('./data/stock_market_data/stockdf.csv')
 
@@ -109,15 +112,21 @@ def clean_data(run_all=False):
         "sp500",
         "forbes2000"
     ]
+    if not run_all:
+        try:
+            print("Reading all_data.csv...")
+            df = pd.read_csv('./data/stock_market_data/all_data.csv')
+        except FileNotFoundError:
+            run_all = True
+
     if run_all:
         etfs = find_ETFs(datasets)
         df = merge_data_to_csv(datasets, etfs)
-    else:
-        print("Reading all_data.csv...")
-        df = pd.read_csv('./data/stock_market_data/all_data.csv')
 
     stockdf = transform_data(df)
     stockdf = adding_market_index(stockdf)
+
+    print(f"Total amount of tickers after cleaning: {len(stockdf.columns)}")
     save_to_csv(stockdf)
 
 if __name__ == '__main__':
