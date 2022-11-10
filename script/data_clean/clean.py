@@ -1,17 +1,21 @@
 import datetime
 import glob
 import sys
+import os
 
 import pandas as pd
 from tqdm import tqdm
 
+# set working directory to current directory
+path = os.path.realpath(__file__).rsplit("/", 1)[0]
+os.chdir(path)
 
 def find_ETFs(datasets):
     x = set()
     print("find ETF's...")
     for dataset in datasets:
         print("Scaning %s" % dataset)
-        all_files = glob.glob(f"./data/stock_market_data/{dataset}/json/*.json")
+        all_files = glob.glob(f"../../data/stock_market_data/{dataset}/json/*.json")
 
         for file in tqdm(all_files):
             with open(file, 'r') as f:
@@ -32,7 +36,7 @@ def merge_data_to_csv(datasets, etfs):
     for dataset in datasets:
         print("Downloading %s" % dataset + "...")
         # Get all files from /data/stock_market_data/dataset/csv
-        all_files = glob.glob(f"./data/stock_market_data/{dataset}/csv/*.csv")
+        all_files = glob.glob(f"../../data/stock_market_data/{dataset}/csv/*.csv")
 
         # For each file in all_files, read the csv file and append it to a list
         df_list = []
@@ -69,7 +73,7 @@ def merge_data_to_csv(datasets, etfs):
 
     print("Saving to all_data.csv...")
     # print df to csv
-    df.to_csv('./data/stock_market_data/all_data.csv')
+    df.to_csv('../../data/stock_market_data/all_data.csv')
     return df
 
 
@@ -91,7 +95,7 @@ def adding_market_index(df):
     
     print("Read HistoricalData_1667914714805.csv...")
     ## Reading in the market_index and making sure that date is datetime so that easily mergable and that date is index
-    hist_data = pd.read_csv('./data/shared_data/HistoricalData_1667914714805.csv')
+    hist_data = pd.read_csv('../../data/shared_data/HistoricalData_1667914714805.csv')
     hist_data['Date'] = pd.to_datetime(hist_data['Date'])
     hist_data.set_index('Date')
 
@@ -103,7 +107,7 @@ def adding_market_index(df):
 def save_to_csv(stockdf):
     print("Saving to stockdf.csv...")
     #print to csv
-    stockdf.to_csv('./data/stock_market_data/stockdf.csv')
+    stockdf.to_csv('../../data/stock_market_data/stockdf.csv')
 
 def clean_data(run_all=False):
     datasets = [
@@ -115,7 +119,7 @@ def clean_data(run_all=False):
     if not run_all:
         try:
             print("Reading all_data.csv...")
-            df = pd.read_csv('./data/stock_market_data/all_data.csv')
+            df = pd.read_csv('../../data/stock_market_data/all_data.csv')
         except FileNotFoundError:
             run_all = True
 
@@ -126,8 +130,8 @@ def clean_data(run_all=False):
     stockdf = transform_data(df)
     stockdf = adding_market_index(stockdf)
 
-    print(f"Total amount of tickers after cleaning: {len(stockdf.columns)}")
     save_to_csv(stockdf)
+    print(f"Total amount of tickers after cleaning: {len(stockdf.columns)}")
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
