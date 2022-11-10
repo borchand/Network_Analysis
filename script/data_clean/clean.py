@@ -1,7 +1,6 @@
 import pandas as pd
 import glob
 from tqdm import tqdm
-import json 
 
 def merge_data_to_csv(datasets):
     dataframes = []
@@ -9,7 +8,7 @@ def merge_data_to_csv(datasets):
     for dataset in datasets:
         print("Downloading %s" % dataset + "...")
         # Get all files from /data/stock_market_data/dataset/csv
-        all_files = glob.glob(f"../../data/stock_market_data/{dataset}/csv/*.csv")
+        all_files = glob.glob(f"./data/stock_market_data/{dataset}/csv/*.csv")
 
         # For each file in all_files, read the csv file and append it to a list
         df_list = []
@@ -36,13 +35,13 @@ def merge_data_to_csv(datasets):
     df = all_df.drop_duplicates()
     # Download all_data
     print("Saving to all_data.csv...")
-    df.to_csv('../../data/stock_market_data/all_data.csv', index=False)
+    df.to_csv('./data/stock_market_data/all_data.csv', index=False)
 
 def remove_ETFs(datasets):
     x = set()
     for dataset in datasets:
         print("Scaning %s" % dataset)
-        all_files = glob.glob(f"../../data/stock_market_data/{dataset}/json/*.json")
+        all_files = glob.glob(f"./data/stock_market_data/{dataset}/json/*.json")
 
         for file in tqdm(all_files):
             with open(file, 'r') as f:
@@ -55,12 +54,12 @@ def remove_ETFs(datasets):
 
     print("Total: %s" % len(x))
 
-    df = pd.read_csv('../../data/stock_market_data/all_data.csv')
+    df = pd.read_csv('./data/stock_market_data/all_data.csv')
     print("Length before removing ETFs: %s" % len(df))
     df = df[~df['ticker'].isin(x)]
     print("Length after removing ETFs: %s" % len(df))
 
-    df.to_csv('../../data/stock_market_data/equity_data.csv', index=False)
+    df.to_csv('./data/stock_market_data/equity_data.csv', index=False)
     print("Data saved to equity_data.csv")
 
 
