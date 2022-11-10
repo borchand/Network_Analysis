@@ -9,8 +9,10 @@ import matplotlib.pyplot as plt
 from networkx.algorithms.community.centrality import girvan_newman
 from scipy.sparse.csgraph import minimum_spanning_tree
 import os 
+from getCol import get_col_to_drop
+from networkx.algorithms import community
 
-def get_corr_matrix(df, threshold=0.9):
+def get_corr_matrix(df, threshold=0.9, from_file=False):
     """Calculate correlation given between column in dataframe.
     To include all columns, set threshold to 0, fx when constructing MST
 
@@ -21,6 +23,17 @@ def get_corr_matrix(df, threshold=0.9):
     Returns:
             ndarray: correlation matrix
     """
+    if from_file == False:
+        print('calculating corr matrix')
+        A = df.corr().to_numpy()
+        print(f'A has {np.isnan(A).sum()} nan values')
+
+        if threshold != 0:
+            A = np.where(abs(A) > threshold, A, 0)
+
+        A = np.where(A == 1, 0, A)
+        return A
+
     threshString = str(threshold).lstrip('0.')
 
     if os.path.isfile(f'../data/corr_matrix_t{threshString}.npy'):
@@ -72,17 +85,24 @@ def get_neighborhood(G, node, depth=1):
     else:
             return {node}.union(*[get_neighborhood(G, neighbor, depth-1) for neighbor in G.neighbors(node)])
 
-thresh = .985
+thresh = .9
 def main(thresh):
     #get data
 
     stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv', index_col=0)
     startlen = len(stockdf.columns)
+    stockdf = stockdf.drop(columns=get_col_to_drop(), axis=1, errors='ignore')
     stockdf = stockdf.dropna(axis=1, how='all')
     print(f'dropped {startlen-len(stockdf.columns)} columns')
-
+    
     #create mst from correlation matrix
-    A = get_corr_matrix(stockdf, threshold=thresh) # get correlation matrix
+    A = get_corr_matrix(stockdf, threshold=thresh)
+    #standerd scaling
+    mask = A != 0
+    A[mask] = (A[mask] - A[mask].mean()) / A[mask].std()
+    A
+
+    print(A.shape) # get correlation matrix
     if thresh == 0:
         print('creating mst from correlation matrix')
         dist = np.sqrt(2*(1-A)) # calc distance matrix
@@ -102,12 +122,12 @@ def main(thresh):
     deg
     #draw graphs
     tickerlst = 'AAPL,AMZN,GOOG,MSFT'.split(',')
-    fig, ax = plt.subplots(1,4, figsize=(20,10))
+    fig, ax = plt.subplots(1,4, figsize=(80,20))
     for i, ticker in enumerate(tickerlst):
         ax[i].set_title(ticker)
-        sub = get_neighborhood(G, ticker, 2)
+        sub = get_neighborhood(G, ticker, 1)
         H = G.subgraph(sub)
-        nx.draw(H, with_labels=True, ax=ax[i])
+        nx.draw(H, with_labels=True, ax=ax[i], alpha=.6, node_size=1000, font_size=20, width=1)
     plt.show()
 
     # remove singletons
@@ -125,17 +145,21 @@ def main(thresh):
     plt.show()
 
     #draw network with colored communities
-    pos = nx.spring_layout(G)
+    communities = community.greedy_modularity_communities(G)
+    #position by community
     colorlist = [ 'r', 'g', 'b', 'c', 'm', 'y', 'brown', 'orange', 'purple' ]
-    communities = girvan_newman(G)
-    setLst = list(next(communities))
-    len(setLst)
+    
+    setLst = list(communities)
     plt.figure(figsize = (50,30))
     for index, sg in enumerate(setLst):
         #draw with orange color text
+        print(index)
+        pos = nx.spring_layout(G.subgraph(sg))
         nx.draw(G.subgraph(sg), pos= pos, node_color= colorlist[index % 7], with_labels=True)
     plt.show()
 
 if __name__ == "__main__":
     main(thresh)
     
+
+
