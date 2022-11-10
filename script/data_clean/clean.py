@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
 from tqdm import tqdm
+import sys
 
 def find_ETFs(datasets):
     x = set()
@@ -120,4 +121,8 @@ def clean_data(run_all=False):
     save_to_csv(stockdf)
 
 if __name__ == '__main__':
-    clean_data()
+    if len(sys.argv) > 1:
+        run_all = sys.argv[1].lower()[0] == "t"
+    else:
+        run_all = False
+    clean_data(run_all)
