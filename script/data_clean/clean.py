@@ -2,6 +2,7 @@ import datetime
 import glob
 import sys
 import os
+import numpy as np
 
 import pandas as pd
 from tqdm import tqdm
@@ -23,7 +24,6 @@ def find_ETFs(datasets):
                 line = lines[8].split("\"")[3]
                 symbol = lines[6].split("\"")[3]
                 time = lines[9].split(":")[1].split(",")[0]
-
                 if line != "EQUITY" or time == " null" or int(time) > 1420072583:
                     x.add(symbol)
     return x
@@ -108,6 +108,7 @@ def save_to_csv(stockdf):
     print("Saving to stockdf.csv...")
     #print to csv
     stockdf.to_csv('../../data/stock_market_data/stockdf.csv')
+    
 
 def clean_data(run_all=False):
     datasets = [
@@ -129,7 +130,17 @@ def clean_data(run_all=False):
 
     stockdf = transform_data(df)
     stockdf = adding_market_index(stockdf)
-
+    
+    # 0 std check, and removing them from stockdf
+    drop_list = []
+    for i in stockdf.columns:
+        std_ = np.std(stockdf[i])
+        if np.std(stockdf[i]) == 0:
+            print(f'{i} has a standard deviation of {np.std(stockdf[i])}')
+            drop_list.append(i)
+    stockdf.drop(columns=drop_list, inplace=True)
+    
+    
     save_to_csv(stockdf)
     print(f"Total amount of tickers after cleaning: {len(stockdf.columns)}")
 
