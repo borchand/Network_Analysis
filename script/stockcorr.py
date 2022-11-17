@@ -112,6 +112,9 @@ def main(thresh):
 
     G = relabel_graph(G, stockdf.columns) # relabel nodes
 
+    # Save graph
+    nx.write_gexf(G, f'../data/stockcorr_t{thresh}.gexf')
+
 
     #get list of degrees sorted
     deg = sorted(G.degree, key=lambda x: x[1], reverse=True)
