@@ -126,8 +126,13 @@ def main(thresh):
         nx.draw(H, with_labels=True, ax=ax[i], alpha=.6, node_size=1000, font_size=20, width=1)
     plt.show()
 
+    # Count number of nodes in whole graph
+    print(f'Number of nodes: {len(G.nodes)}')
     # remove singletons
     G.remove_nodes_from(list(nx.isolates(G)))
+    print(f'Number of nodes after removing singletons: {len(G.nodes)}')
+    print(f'That is {len(G.nodes)/len(stockdf.columns)*100:.2f}% of all stocks')
+    
     #draw network with colored connected components
     pos = nx.spring_layout(G)
     colorlist = [ 'r', 'g', 'b', 'c', 'm', 'y', 'brown', 'orange', 'purple' ]
