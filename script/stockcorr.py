@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from networkx.algorithms.community.centrality import girvan_newman
 from scipy.sparse.csgraph import minimum_spanning_tree
 import os 
-from getCol import get_col_to_drop
 from networkx.algorithms import community
 
 def get_corr_matrix(df, threshold=0.9, from_file=False):
@@ -91,7 +90,6 @@ def main(thresh):
 
     stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv', index_col=0)
     startlen = len(stockdf.columns)
-    stockdf = stockdf.drop(columns=get_col_to_drop(), axis=1, errors='ignore')
     stockdf = stockdf.dropna(axis=1, how='all')
     print(f'dropped {startlen-len(stockdf.columns)} columns')
     
@@ -114,8 +112,6 @@ def main(thresh):
 
     G = relabel_graph(G, stockdf.columns) # relabel nodes
 
-    #count nan in dist
-    print(f'number of nan in dist: {np.isnan(dist).sum()}')
 
     #get list of degrees sorted
     deg = sorted(G.degree, key=lambda x: x[1], reverse=True)
