@@ -104,10 +104,10 @@ def adding_market_index(df):
     ## formating column and naming stock COMP
     return x
 
-def save_to_csv(stockdf):
-    print("Saving to stockdf.csv...")
+def save_to_csv(stockdf, fileName='stockdf.csv'):
+    print(f"Saving to {fileName}.csv...")
     #print to csv
-    stockdf.to_csv('../../data/stock_market_data/stockdf.csv')
+    stockdf.to_csv(f'../../data/stock_market_data/{fileName}.csv')
     
 
 def clean_data(run_all=False):
@@ -140,6 +140,20 @@ def clean_data(run_all=False):
             drop_list.append(i)
     stockdf.drop(columns=drop_list, inplace=True)
     
+    stockdf = pd.read_csv('../../data/stock_market_data/stockdf.csv')
+    stockdf['Date'] = pd.to_datetime(stockdf['Date'])
+    
+    ## create a mask where the date is between start and end of corona
+    start_of_corona = datetime.datetime(2020, 3, 15)
+    end_of_corona = datetime.datetime(2022, 1, 30)
+    corona_mask = (stockdf['Date'] >= start_of_corona) & (stockdf['Date'] <= end_of_corona)
+    save_to_csv(stockdf[corona_mask].set_index(stockdf[corona_mask]['Date']), 'corna_stockdf')
+    
+    ## creat ukrain war csv
+    start_of_ukrain = datetime.datetime(2022, 2, 24)
+    end_of_ukrain = datetime.datetime(2022, 10, 24)
+    ukrain_mask = (stockdf['Date'] >= start_of_ukrain) & (stockdf['Date'] <= end_of_ukrain)
+    save_to_csv(stockdf[ukrain_mask].set_index(stockdf[ukrain_mask]['Date']), 'ukrain_stockdf')   
     
     save_to_csv(stockdf)
     print(f"Total amount of tickers after cleaning: {len(stockdf.columns)}")
