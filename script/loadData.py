@@ -86,6 +86,9 @@ def clean_data(run_all=False):
 
     #remove days with 0 data ie. hollidays and weekends.
     df.dropna(axis=0, how='all', inplace=True)
+
+    #drop duplicate columns stemming from stocks in both nasdaq and nyse
+    df.drop(list(df.filter(regex = '_y')), axis = 1, inplace = True)
     return df
 
 df = clean_data(run_all = True)
