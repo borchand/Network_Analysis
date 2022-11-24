@@ -72,12 +72,12 @@ def clean_data(run_all=False):
 
                 symbol = file.split("/")[-1].split(".")[0]
                 
-                #if not in the set merge to df
+                #if not in etfs set merge to df
                 if symbol not in etfs:
                     #read csv file for corresponding symbol
                     temp_df = pd.read_csv(file)
 
-                    #Set index to datetime and rename close to symbol name (for merging)
+                    #Set index of temp df to datetime and rename close column to symbol name (for merging)
                     temp_df.index = pd.to_datetime(temp_df['Date'], format='%d-%m-%Y')
                     temp_df.rename({'Close': symbol}, axis=1, inplace=True)
 
@@ -89,3 +89,5 @@ def clean_data(run_all=False):
     return df
 
 df = clean_data(run_all = True)
+
+df.to_csv('quickStockdf.csv', index=True)
