@@ -1,7 +1,7 @@
 import datetime
 import glob
-import sys
 import os
+import sys
 
 import pandas as pd
 from tqdm import tqdm
