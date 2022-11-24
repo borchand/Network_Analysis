@@ -1,16 +1,14 @@
 #stock correlation network
-from re import I
-import datetime
-import pandas as pd
-import numpy as np
-import networkx as nx
+import os
+
 import matplotlib.pyplot as plt
-from networkx.algorithms.community.centrality import girvan_newman
-from scipy.sparse.csgraph import minimum_spanning_tree
-import os 
-from networkx.algorithms import community
-from matplotlib.animation import FuncAnimation
+import networkx as nx
+import numpy as np
+import pandas as pd
 from colour import Color
+from matplotlib.animation import FuncAnimation
+from scipy.sparse.csgraph import minimum_spanning_tree
+
 
 def get_corr_matrix(df, threshold=0.9, from_file=False):
     """Calculate correlation given between column in dataframe.

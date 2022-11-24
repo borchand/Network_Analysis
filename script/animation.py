@@ -1,10 +1,9 @@
 import networkx as nx
-from matplotlib import pyplot as plt, animation
-import random
-import pandas as pd
 import numpy as np
+import pandas as pd
 from colour import Color
-
+from matplotlib import animation
+from matplotlib import pyplot as plt
 
 # Animate stocks so they go green if their price increases and red if it decreases
 weeks = 52
