@@ -79,7 +79,6 @@ def create_conected_net(connected_mst: nx.Graph, corr_net: nx.Graph):
             sub = subgraphs[node0]
             for y in sub.nodes():
                 nodes_all.remove(y)
-            subgraphs.pop(node0)
         except: 
             for y in subgraphs:
                 if node0 in subgraphs[y].nodes():
@@ -103,7 +102,7 @@ def main():
     plt.show()
 
     connected_mst = G_without_max_degree
-    main_tree = create_conected_net(corr_net, connected_mst)
+    main_tree = create_conected_net(connected_mst, corr_net)
     nx.draw(main_tree, with_labels=False, node_size=10, alpha=.6, width=1)
     
     plt.show()
