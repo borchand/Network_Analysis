@@ -1,15 +1,17 @@
 import datetime
 import glob
-import sys
 import os
 import numpy as np
+import sys
+
 
 import pandas as pd
 from tqdm import tqdm
 
 # set working directory to current directory
-path = os.path.realpath(__file__).rsplit("/", 1)[0]
-os.chdir(path)
+path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
+dir = os.path.dirname(path) #point to a directory
+os.chdir(dir)
 
 def find_ETFs(datasets):
     x = set()

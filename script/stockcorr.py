@@ -1,14 +1,13 @@
 #stock correlation network
-from re import I
-import datetime
-import pandas as pd
-import numpy as np
-import networkx as nx
+import os
+
 import matplotlib.pyplot as plt
-from networkx.algorithms.community.centrality import girvan_newman
-from scipy.sparse.csgraph import minimum_spanning_tree
-import os 
+import networkx as nx
+import numpy as np
+import pandas as pd
 from networkx.algorithms import community
+from scipy.sparse.csgraph import minimum_spanning_tree
+
 
 # set working directory to current directory
 path = os.path.realpath(__file__).rsplit("/", 1)[0]
@@ -125,6 +124,10 @@ def main(thresh):
 
     G = relabel_graph(G, stockdf.columns) # relabel nodes
 
+    # Save graph
+    nx.write_gexf(G, f'../data/stockcorr_t{thresh}.gexf')
+
+
     #get list of degrees sorted
     deg = sorted(G.degree, key=lambda x: x[1], reverse=True)
     deg
@@ -138,8 +141,13 @@ def main(thresh):
         nx.draw(H, with_labels=True, ax=ax[i], alpha=.6, node_size=1000, font_size=20, width=1)
     plt.show()
 
+    # Count number of nodes in whole graph
+    print(f'Number of nodes: {len(G.nodes)}')
     # remove singletons
     G.remove_nodes_from(list(nx.isolates(G)))
+    print(f'Number of nodes after removing singletons: {len(G.nodes)}')
+    print(f'That is {len(G.nodes)/len(stockdf.columns)*100:.2f}% of all stocks')
+    
     #draw network with colored connected components
     pos = nx.spring_layout(G)
     colorlist = [ 'r', 'g', 'b', 'c', 'm', 'y', 'brown', 'orange', 'purple' ]
