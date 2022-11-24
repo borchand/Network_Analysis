@@ -3,15 +3,19 @@ import glob
 import os
 import numpy as np
 import sys
-
+from sys import platform
 
 import pandas as pd
 from tqdm import tqdm
 
 # set working directory to current directory
-path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
-dir = os.path.dirname(path) #point to a directory
-os.chdir(dir)
+if platform == "darwin":
+    path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
+    os.chdir(path)
+else:
+    path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
+    dir = os.path.dirname(path) #point to a directory
+    os.chdir(dir)
 
 def find_ETFs(datasets):
     x = set()
@@ -167,6 +171,7 @@ def clean_data(run_all=False):
     print(f"Total amount of tickers after cleaning: {len(stockdf.columns)}")
 
 if __name__ == '__main__':
+    print(platform)
     if len(sys.argv) > 1:
         run_all = sys.argv[1].lower()[0] == "t"
     else:
