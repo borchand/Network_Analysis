@@ -24,8 +24,7 @@ def find_ETFs(datasets):
                 line = lines[8].split("\"")[3]
                 symbol = lines[6].split("\"")[3]
                 time = lines[9].split(":")[1].split(",")[0]
-
-                if line != "EQUITY" or time == "null" or int(time) > 1420072583: #Why is this number here?
+                if line != "EQUITY" or time == "null" or int(time) > 1420072583:
                     x.add(symbol)
     return x
 
