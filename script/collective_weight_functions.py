@@ -14,7 +14,7 @@ def split_into_years(stock_df = pd.read_csv('../data/stock_market_data/stockdf.c
     ## split the stockdf into dataframes, one for each year
 
     dataframes_ = [stock_df[stock_df['Date'].dt.year == year] for year in first_date]
-
+    dataframes_ = [df.set_index('Date') for df in dataframes_]
     corr_list = []
     for i in dataframes_:
         curr_ = sc.get_corr_matrix(i, 0.9)
@@ -25,4 +25,4 @@ def split_into_years(stock_df = pd.read_csv('../data/stock_market_data/stockdf.c
     ## sum all correlation matrices in corr_list
 
     total_sum = sum(corr_list)
-    return corr_list, total_sum
+    return corr_list, total_sum, dataframes_
