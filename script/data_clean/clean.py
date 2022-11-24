@@ -1,7 +1,9 @@
 import datetime
 import glob
 import os
+import numpy as np
 import sys
+
 
 import pandas as pd
 from tqdm import tqdm
@@ -24,7 +26,6 @@ def find_ETFs(datasets):
                 line = lines[8].split("\"")[3]
                 symbol = lines[6].split("\"")[3]
                 time = lines[9].split(":")[1].split(",")[0]
-
                 if line != "EQUITY" or time == " null" or int(time) > 1420072583:
                     x.add(symbol)
     return x
@@ -105,10 +106,29 @@ def adding_market_index(df):
     ## formating column and naming stock COMP
     return x
 
-def save_to_csv(stockdf):
-    print("Saving to stockdf.csv...")
+def save_to_csv(stockdf, fileName='stockdf'):
+    print(f"Saving to {fileName}.csv...")
     #print to csv
-    stockdf.to_csv('../../data/stock_market_data/stockdf.csv')
+    stockdf.to_csv(f'../../data/stock_market_data/{fileName}.csv')
+
+def drop_nan_std(stockdf):
+    # 0 std check, and removing them from stockdf
+    drop_list = []
+    for i in stockdf.columns:
+        std_ = np.std(stockdf[i])
+        if np.std(stockdf[i]) == 0:
+            print(f'{i} has a standard deviation of {np.std(stockdf[i])}')
+            drop_list.append(i)
+    print(f'Dropping {len(drop_list)} columns')
+    stockdf.drop(columns=drop_list, inplace=True)
+    return stockdf
+
+def sub_dataframe_to_csv(stockdf, start_date, end_date, fileName):
+    ## create a mask where the date is between start and end
+    print(f"Creating {fileName}.csv...")
+    mask = (stockdf.index >= start_date) & (stockdf.index <= end_date)
+    save_to_csv(stockdf[mask].set_index(stockdf[mask].index), fileName)
+    
 
 def clean_data(run_all=False):
     datasets = [
@@ -130,7 +150,19 @@ def clean_data(run_all=False):
 
     stockdf = transform_data(df)
     stockdf = adding_market_index(stockdf)
+    stockdf = drop_nan_std(stockdf)
 
+    # creat covid csv
+    start_of_corona = datetime.datetime(2020, 3, 15)
+    end_of_corona = datetime.datetime(2022, 1, 30)
+    
+    sub_dataframe_to_csv(stockdf, start_of_corona, end_of_corona, 'stockdf_corona')
+    
+    # creat ukrain war csv
+    start_of_ukrain = datetime.datetime(2022, 2, 24)
+    end_of_ukrain = datetime.datetime(2022, 10, 24)
+    sub_dataframe_to_csv(stockdf, start_of_ukrain, end_of_ukrain, 'stockdf_ukrain')
+    
     save_to_csv(stockdf)
     print(f"Total amount of tickers after cleaning: {len(stockdf.columns)}")
 

@@ -9,6 +9,10 @@ from networkx.algorithms import community
 from scipy.sparse.csgraph import minimum_spanning_tree
 
 
+# set working directory to current directory
+path = os.path.realpath(__file__).rsplit("/", 1)[0]
+os.chdir(path)
+
 def get_corr_matrix(df, threshold=0.9, from_file=False):
     """Calculate correlation given between column in dataframe.
     To include all columns, set threshold to 0, fx when constructing MST
@@ -82,12 +86,24 @@ def get_neighborhood(G, node, depth=1):
     else:
             return {node}.union(*[get_neighborhood(G, neighbor, depth-1) for neighbor in G.neighbors(node)])
 
-thresh = .9
+def min_spanning_tree(A):
+    dist = np.sqrt(2*(1-A)) # calc distance matrix
+    mst = minimum_spanning_tree(dist) # get sparse mst matrix
+    G = nx.from_scipy_sparse_matrix(mst) # convert to graph
+    #count nan in dist
+    return G
+
+def graph_from_corr_matrix(A, threshold=0.9, from_file=False):
+    G = nx.from_numpy_matrix(A, create_using=nx.Graph, thresh = threshold)
+    return(G)
+
+thresh = 0
 def main(thresh):
     #get data
 
     stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv', index_col=0)
     startlen = len(stockdf.columns)
+
     stockdf = stockdf.dropna(axis=1, how='all')
     print(f'dropped {startlen-len(stockdf.columns)} columns')
     
@@ -95,18 +111,16 @@ def main(thresh):
     A = get_corr_matrix(stockdf, threshold=thresh)
     #standerd scaling
     mask = A != 0
-    A[mask] = (A[mask] - A[mask].mean()) / A[mask].std()
-    A
+    #A[mask] = (A[mask] - A[mask].mean()) / A[mask].std()
+    #A
 
     print(A.shape) # get correlation matrix
     if thresh == 0:
         print('creating mst from correlation matrix')
-        dist = np.sqrt(2*(1-A)) # calc distance matrix
-        mst = minimum_spanning_tree(dist) # get sparse mst matrix
-        G = nx.from_scipy_sparse_matrix(mst) # convert to graph
+        G = min_spanning_tree(A)
     else:
         print('creating graph from correlation matrix')
-        G = nx.from_numpy_matrix(A, create_using=nx.Graph) # convert to graph
+        G = nx.from_numpy_matrix(A, threshold=thresh)
 
     G = relabel_graph(G, stockdf.columns) # relabel nodes
 
