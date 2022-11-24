@@ -4,7 +4,7 @@ import os
 import numpy as np
 import sys
 from sys import platform
-
+from matplotlib import pyplot as plt
 import pandas as pd
 from tqdm import tqdm
 
@@ -18,6 +18,14 @@ else:
     os.chdir(dir)
 
 def find_ETFs(datasets):
+    """Find All non stocks from all json files
+
+    Args:
+        datasets (list): list of names of stock exchanges
+
+    Returns:
+        set: set containing all stocks
+    """    
     x = set()
     print("find ETF's...")
     for dataset in datasets:
@@ -54,6 +62,9 @@ def merge_data_to_csv(datasets, etfs):
                 # cut off data before datetime of 2005-01-01
                 df = df[df["Date"] >= cut_off_date]
                 df_list.append(df)
+                if symbol == 'AAPL':
+                    df['Close'].plot()
+                    plt.show()
                 tickers.add(symbol)
 
         # Create a dataframe with all the data, including a column with the file name
