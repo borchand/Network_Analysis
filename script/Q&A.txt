@@ -1,0 +1,13 @@
+1. How are we going to manage someone else using our project? 
+
+The thing is, the data on Kaggle is updated each week, and HistoricalData
+is hard-coded. That could throw some errors if the newest dates don't match. 
+
+That could be solved by setting this to how="right" and therefore trimming the newest data
+
+From clean.py (add market index)
+
+## Join df with hist_data on Date
+x = df.join(hist_data.set_index('Date')['Close/Last'], on='Date', how='left', lsuffix='_caller', rsuffix='_other').rename(columns={'Close/Last': 'COMP'})
+
+2. 

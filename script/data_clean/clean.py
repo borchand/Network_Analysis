@@ -25,7 +25,7 @@ def find_ETFs(datasets):
                 symbol = lines[6].split("\"")[3]
                 time = lines[9].split(":")[1].split(",")[0]
 
-                if line != "EQUITY" or time == " null" or int(time) > 1420072583:
+                if line != "EQUITY" or time == "null" or int(time) > 1420072583: #Why is this number here?
                     x.add(symbol)
     return x
 
@@ -100,8 +100,8 @@ def adding_market_index(df):
     hist_data['Date'] = pd.to_datetime(hist_data['Date'])
     hist_data.set_index('Date')
 
-    ## Join df with hist_data on Date
-    x = df.join(hist_data.set_index('Date')['Close/Last'], on='Date', how='left', lsuffix='_caller', rsuffix='_other').rename(columns={'Close/Last': 'COMP'})
+    ## Join df with hist_data on Date with right merge to keep all the dates
+    x = df.join(hist_data.set_index('Date')['Close/Last'], on='Date', how='right', lsuffix='_caller', rsuffix='_other').rename(columns={'Close/Last': 'COMP'})
     ## formating column and naming stock COMP
     return x
 
