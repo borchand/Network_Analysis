@@ -26,16 +26,16 @@ def get_corr_matrix(df, threshold=0.9, from_file=False):
     """
     if from_file == False:
         print('calculating corr matrix')
-        A = df.corr().to_numpy()
+        A = df.corr().to_numpy() #this creates the correlation matrix, fast and easy
         print(f'A has {np.isnan(A).sum()} nan values')
 
         if threshold != 0:
             A = np.where(abs(A) > threshold, A, 0)
 
-        A = np.where(A == 1, 0, A)
+        A = np.where(A == 1, 0, A) #removes self correlations
         return A
 
-    threshString = str(threshold).lstrip('0.')
+    threshString = str(threshold).lstrip('0.') #file name change, it should not be what was created
 
     if os.path.isfile(f'../data/corr_matrix_t{threshString}.npy'):
         print('loading corr matrix from file')
@@ -50,8 +50,8 @@ def get_corr_matrix(df, threshold=0.9, from_file=False):
             A = np.where(abs(A) > threshold, A, 0)
 
         A = np.where(A == 1, 0, A)
-        with open(f'../data/corr_matrix_t{threshString}.npy', 'wb') as f:
-            np.save(f, A)
+        with open(f'../data/corr_matrix_t{threshString}.npy', 'wb') as f: 
+            np.save(f, A) #save as a binary file
             
             return A
 
@@ -87,14 +87,14 @@ def get_neighborhood(G, node, depth=1):
             return {node}.union(*[get_neighborhood(G, neighbor, depth-1) for neighbor in G.neighbors(node)])
 
 def min_spanning_tree(A):
-    dist = np.sqrt(2*(1-A)) # calc distance matrix
+    #why is it raised to 1-A power though? 
+    dist = np.sqrt(2*(1-A)) # calc distance matrix. 1-A because we want a maximum spanning tree. That's what some paper said to use instead 0-A, -A etc.
     mst = minimum_spanning_tree(dist) # get sparse mst matrix
     G = nx.from_scipy_sparse_matrix(mst) # convert to graph
-    #count nan in dist
     return G
 
-def graph_from_corr_matrix(A, threshold=0.9, from_file=False):
-    G = nx.from_numpy_matrix(A, create_using=nx.Graph, thresh = threshold)
+def graph_from_corr_matrix(A): #I've thrown away redundant stuff from this function
+    G = nx.from_numpy_matrix(A, create_using=nx.Graph)
     return(G)
 
 thresh = 0
@@ -109,6 +109,7 @@ def main(thresh):
     
     #create mst from correlation matrix
     A = get_corr_matrix(stockdf, threshold=thresh)
+
     #standerd scaling
     mask = A != 0
     #A[mask] = (A[mask] - A[mask].mean()) / A[mask].std()

@@ -149,21 +149,21 @@ def clean_data(run_all=False):
         df = merge_data_to_csv(datasets, etfs)
 
     stockdf = transform_data(df)
-    stockdf = adding_market_index(stockdf)
+    #stockdf = adding_market_index(stockdf)
     stockdf = drop_nan_std(stockdf)
 
-    # creat covid csv
-    start_of_corona = datetime.datetime(2020, 3, 15)
-    end_of_corona = datetime.datetime(2022, 1, 30)
+    # # creat covid csv
+    # start_of_corona = datetime.datetime(2020, 3, 15)
+    # end_of_corona = datetime.datetime(2022, 1, 30)
     
-    sub_dataframe_to_csv(stockdf, start_of_corona, end_of_corona, 'stockdf_corona')
+    # sub_dataframe_to_csv(stockdf, start_of_corona, end_of_corona, 'stockdf_corona')
     
-    # creat ukrain war csv
-    start_of_ukrain = datetime.datetime(2022, 2, 24)
-    end_of_ukrain = datetime.datetime(2022, 10, 24)
-    sub_dataframe_to_csv(stockdf, start_of_ukrain, end_of_ukrain, 'stockdf_ukrain')
+    # # creat ukrain war csv
+    # start_of_ukrain = datetime.datetime(2022, 2, 24)
+    # end_of_ukrain = datetime.datetime(2022, 10, 24)
+    # sub_dataframe_to_csv(stockdf, start_of_ukrain, end_of_ukrain, 'stockdf_ukrain')
     
-    save_to_csv(stockdf)
+    save_to_csv(stockdf, 'stockdf2')
     print(f"Total amount of tickers after cleaning: {len(stockdf.columns)}")
 
 if __name__ == '__main__':
