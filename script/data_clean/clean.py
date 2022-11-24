@@ -10,8 +10,8 @@ from tqdm import tqdm
 
 # set working directory to current directory
 path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
-dir = os.path.dirname(path) #point to a directory
-os.chdir(dir)
+# dir = os.path.dirname(path) #point to a directory
+os.chdir(path)
 
 def find_ETFs(datasets):
     x = set()
@@ -22,11 +22,10 @@ def find_ETFs(datasets):
 
         for file in tqdm(all_files):
             with open(file, 'r') as f:
-                lines = [f.readline() for _ in range(10)]
+                lines = [f.readline() for _ in range(9)]
                 line = lines[8].split("\"")[3]
                 symbol = lines[6].split("\"")[3]
-                time = lines[9].split(":")[1].split(",")[0]
-                if line != "EQUITY" or time == " null" or int(time) > 1420072583:
+                if line != "EQUITY":
                     x.add(symbol)
     return x
 
@@ -44,21 +43,22 @@ def merge_data_to_csv(datasets, etfs):
         df_list = []
         for file in tqdm(all_files):
             symbol = file.split("/")[-1].split(".")[0]
-            if symbol not in etfs or symbol not in tickers:
-                df = pd.read_csv(file)
-                df["Date"] = pd.to_datetime(df["Date"], dayfirst=True)
-                # cut off data before datetime of 2005-01-01
-                df = df[df["Date"] >= cut_off_date]
-                df_list.append(df)
-                tickers.add(symbol)
+            df = pd.read_csv(file)
+            df["Date"] = pd.to_datetime(df["Date"], dayfirst=True)
+            # cut off data before datetime of 2005-01-01
+            df = df[df["Date"] >= cut_off_date]
+            df_list.append(df)
+            tickers.add(symbol)
 
         # Create a dataframe with all the data, including a column with the file name
         print("Concatenating %s" % dataset + "...")
         df = pd.concat(df_list, keys=all_files)
 
         # Extract the ticker from the file name. The ticker is right before .csv
+        
         df['ticker'] = df.index.get_level_values(0).str.split('/').str[-1].str.split('.').str[0]
         
+        print(df[df["ticker"] == "AAPL"])
         # Reset the index
         df = df.reset_index(drop=True)
         # Add the dataframe to a list
@@ -72,7 +72,6 @@ def merge_data_to_csv(datasets, etfs):
     nan_tickers = df[df['ticker'].isna()]['ticker'].unique()
 
     df = df[~df['ticker'].isin(nan_tickers)]
-
     print("Saving to all_data.csv...")
     # print df to csv
     df.to_csv('../../data/stock_market_data/all_data.csv')
@@ -132,8 +131,8 @@ def sub_dataframe_to_csv(stockdf, start_date, end_date, fileName):
 
 def clean_data(run_all=False):
     datasets = [
-        "nyse",
         "nasdaq",
+        "nyse",
         "sp500",
         "forbes2000"
     ]
@@ -149,7 +148,7 @@ def clean_data(run_all=False):
         df = merge_data_to_csv(datasets, etfs)
 
     stockdf = transform_data(df)
-    stockdf = adding_market_index(stockdf)
+    # stockdf = adding_market_index(stockdf)
     stockdf = drop_nan_std(stockdf)
 
     # creat covid csv
