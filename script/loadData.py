@@ -44,7 +44,9 @@ def find_ETFs(datasets):
 def clean_data(run_all=False):
     datasets = [
         "nyse",
-        "nasdaq"
+        "nasdaq",
+        "forbes2000",
+        "sp500"
     ] 
     #Dont look at composite index'es
 
@@ -87,8 +89,8 @@ def clean_data(run_all=False):
     #remove days with 0 data ie. hollidays and weekends.
     df.dropna(axis=0, how='all', inplace=True)
 
-    #drop duplicate columns stemming from stocks in both nasdaq and nyse
-    df.drop(list(df.filter(regex = '_y')), axis = 1, inplace = True)
+    #drop duplicate columns by finding columns where pandas appended _x or _y to avoid conflict
+    df.drop(list(df.filter(regex = '_')), axis = 1, inplace = True)
     return df
 
 df = clean_data(run_all = True)
