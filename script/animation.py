@@ -12,7 +12,7 @@ weeks = 52
 
 # Load stock data csv
 # Format is: stocks as columns and dates as rows
-stockdf = pd.read_csv('./data/stock_market_data/stockdf.csv', index_col=0)
+stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv', index_col=0)
 
 # Get subset of data in weeks
 stockdf = stockdf.iloc[-weeks*5:]
@@ -68,17 +68,8 @@ def animate(week):
     fig.suptitle(f'Week {week+1} ({stockdf.index[week]})')
     # Get stock prices for this week
     stockprices = stockdf.iloc[week]
-    # Get stock prices for last week
-    if week > 0:
-        # last_stockprices = stockdf.iloc[week-1]
-
-        # Set last stockprices to the stock price for the first week in stockdf.
-        # Then we can calculate the percentage change from the first week to the current week
-        last_stockprices = stockdf.iloc[0]
-    else:
-        # If we are on the first week we can't calculate the percentage change, so we just set last_stockprices equal to the current stockprices
-        last_stockprices = stockprices
-
+    # Get stock prices for first week
+    last_stockprices = stockdf.iloc[0]
 
     # Calculate percentage change
     change = ((stockprices - last_stockprices) / last_stockprices) * 100

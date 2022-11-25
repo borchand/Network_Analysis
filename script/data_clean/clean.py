@@ -9,7 +9,7 @@ import pandas as pd
 from tqdm import tqdm
 
 # set working directory to current directory
-if platform == "darwin":
+if platform == "darwin" or platform == "linux":
     path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
     os.chdir(path)
 else:
