@@ -40,7 +40,6 @@ def find_ETFs(datasets):
                     x.add(symbol)
     return x
 
-
 def clean_data(run_all=False):
     datasets = [
         "nyse",

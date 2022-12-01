@@ -88,11 +88,10 @@ thresh = .9
 def main(thresh):
     #get data
 
-    stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv', index_col=0)
+    stockdf = pd.read_csv('quickStockdf.csv', index_col=0)
     startlen = len(stockdf.columns)
     stockdf = stockdf.dropna(axis=1, how='all')
     print(f'dropped {startlen-len(stockdf.columns)} columns')
-    stockdf['TWTR'].plot()
     #create mst from correlation matrix
     A = get_corr_matrix(stockdf, threshold=thresh)
     #standerd scaling
@@ -114,13 +113,13 @@ def main(thresh):
     B = np.where(A == 0, np.where(mst.toarray() != 0, 0.01, 0), A)
     print('creating graph from correlation matrix')
     #create using weighted graph
-    G = nx.from_numpy_matrix(A, create_using=nx.Graph) 
-    H = nx.from_numpy_matrix(B, create_using=nx.Graph)# convert to graph
+    Gcorr = nx.from_numpy_matrix(A, create_using=nx.Graph) 
+    Gadded = nx.from_numpy_matrix(B, create_using=nx.Graph)# convert to graph
 
-    F = nx.from_scipy_sparse_matrix(mst) # convert to graph
-    G = relabel_graph(G, stockdf.columns) # relabel nodes
-    H = relabel_graph(H, stockdf.columns) # relabel nodes
-    F = relabel_graph(F, stockdf.columns) # relabel nodes
+    Gmst = nx.from_scipy_sparse_matrix(mst) # convert to graph
+    Gcorr = relabel_graph(Gcorr, stockdf.columns) # relabel nodes
+    Gadded = relabel_graph(Gadded, stockdf.columns) # relabel nodes
+    Gmst = relabel_graph(Gmst, stockdf.columns) # relabel nodes
 
     # print(len(F.nodes))
     # F.remove_nodes_from(list(nx.isolates(F)))
@@ -129,18 +128,18 @@ def main(thresh):
     # nx.write_gexf(G, f'../data/stockcorr_t{thresh}.gexf')
 
 
-    # #get list of degrees sorted
-    # deg = sorted(G.degree, key=lambda x: x[1], reverse=True)
-    # deg
-    # #draw graphs
-    # tickerlst = 'AAPL,AMZN,GOOG,MSFT'.split(',')
-    # fig, ax = plt.subplots(1,4, figsize=(80,20))
-    # for i, ticker in enumerate(tickerlst):
-    #     ax[i].set_title(ticker)
-    #     sub = get_neighborhood(G, ticker, 1)
-    #     H = G.subgraph(sub)
-    #     nx.draw(H, with_labels=True, ax=ax[i], alpha=.6, node_size=1000, font_size=20, width=1)
-    # plt.show()
+    #get list of degrees sorted
+    deg = sorted(Gadded.degree, key=lambda x: x[1], reverse=True)
+    deg
+    #draw graphs
+    tickerlst = 'AAPL,AMZN,GOOG,MSFT'.split(',')
+    fig, ax = plt.subplots(1,4, figsize=(80,20))
+    for i, ticker in enumerate(tickerlst):
+        ax[i].set_title(ticker)
+        sub = get_neighborhood(Gadded, ticker, 1)
+        H = Gadded.subgraph(sub)
+        nx.draw(H, with_labels=True, ax=ax[i], alpha=.6, node_size=1000, font_size=20, width=1)
+    plt.show()
 
     # # Count number of nodes in whole graph
     # print(f'Number of nodes: {len(G.nodes)}')
@@ -174,22 +173,21 @@ def main(thresh):
 
 
     #draw network with colored communities
-    communities = community.greedy_modularity_communities(H)
+    communities = community.greedy_modularity_communities(Gadded)
     #position by community
     colorlist = [ 'r', 'g', 'b', 'c', 'm', 'y', 'brown', 'orange', 'purple' ]
     
     setLst = list(communities)
     plt.figure(figsize = (50,10))
-    print(H.nodes.data())
     for index, sg in enumerate(setLst):
         #draw with orange color text
-        pos = nx.spring_layout(H.subgraph(sg))
-        nx.draw_networkx_nodes(H.subgraph(sg), pos= pos, node_color= colorlist[index % 7])
-        nx.draw_networkx_labels(H.subgraph(sg), pos= pos)
-        nx.draw_networkx_edges(H.subgraph(sg), pos= pos, alpha=)
+        pos = nx.spring_layout(Gadded.subgraph(sg))
+        nx.draw_networkx_nodes(Gadded.subgraph(sg), pos= pos, node_color= colorlist[index % 7])
+        nx.draw_networkx_labels(Gadded.subgraph(sg), pos= pos)
+        nx.draw_networkx_edges(Gadded.subgraph(sg), pos= pos, alpha=0.5)
         # make apple clearer by drawing it again
         if 'AAPL' in sg:
-            nx.draw_networkx_edges(H.subgraph(get_neighborhood(H, 'AAPL', 1)), pos= pos, alpha=1)
+            nx.draw_networkx_edges(Gadded.subgraph(get_neighborhood(Gadded, 'AAPL', 1)), pos= pos, alpha=1)
     plt.show()
 
 if __name__ == "__main__":
