@@ -29,7 +29,7 @@ def find_ETFs(datasets):
     print("find ETF's...")
     for dataset in datasets:
         print("Scaning %s" % dataset)
-        all_files = glob.glob(f"../data/stock_market_data/{dataset}/json/*.json")
+        all_files = glob.glob(f"../../data/stock_market_data/{dataset}/json/*.json")
         for file in tqdm(all_files):
             with open(file, 'r') as f:
                 lines = [f.readline() for _ in range(10)]
@@ -94,4 +94,4 @@ def clean_data(run_all=False):
 
 df = clean_data(run_all = True)
 
-df.to_csv('Stockdf.csv', index=True)
+df.to_csv('../../data/Stockdf.csv', index=True)
