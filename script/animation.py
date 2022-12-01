@@ -54,7 +54,6 @@ G = G.subgraph(list(G.nodes)[:100])
 pos = nx.spring_layout(G)
 
 # Draw edges
-# TODO: (Cumulative) Redraw edges every frame depending on correlation for that week?
 nx.draw_networkx_edges(G, pos=pos, alpha=.1, ax=ax[0])
 # Draw labels
 nx.draw_networkx_labels(G, pos=pos, font_size=7, ax=ax[0])
