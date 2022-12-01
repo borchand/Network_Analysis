@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import stockcorr as sc 
 from networkx.algorithms import community
 
-def split_into_years(stock_df = pd.read_csv('../data/stock_market_data/stockdf.csv')):
+def split_into_years(thresh = 0.9):
     ## IMPORTANT: Only works when index is not the date column
-    
+    stock_df = pd.read_csv('../data/stock_market_data/stockdf.csv')
     stock_df['Date'] = pd.to_datetime(stock_df['Date'])
     first_date = stock_df['Date'].dt.year.drop_duplicates()
 
@@ -24,5 +24,5 @@ def split_into_years(stock_df = pd.read_csv('../data/stock_market_data/stockdf.c
 
     ## sum all correlation matrices in corr_list
 
-    total_sum = sum(corr_list)
+    total_sum = np.sum(corr_list)
     return corr_list, total_sum, dataframes_

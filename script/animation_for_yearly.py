@@ -8,14 +8,20 @@ from matplotlib import pyplot as plt
 from stockcorr import get_corr_matrix, relabel_graph
 import collective_weight_functions as cwf
 
+# TODO IMPORTANT CHANGE AX1 PLOT FROM AAPL TO MARKET INDEX
+
 # Animate stocks so they go green if their price increases and red if it decreases
 years = 18
 # Load stock data csv
 # Format is: stocks as columns and dates as rows
 stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv')
 
-corr_, total_sum = cwf.split_into_years(stockdf)
+corr_, total_sum, dataframes_ = cwf.split_into_years(stockdf)
 
+
+## make date into datetime object
+stockdf['Date'] = pd.to_datetime(stockdf['Date'])
+stockdf = stockdf.set_index('Date')
 
 # Create subplot with network on top and small graph on bottom
 fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
@@ -31,7 +37,9 @@ ax[1].spines['right'].set_linewidth(0.5)
 ax[1].spines['bottom'].set_linewidth(0.5)
 ax[1].spines['left'].set_linewidth(0.5)
 # Plot initial data on ax[1] (bottom subplot)
-ax[1].plot(stockdf['COMP'], color='darkblue', linewidth=0.8)
+## Get the average % change in price for each date
+avg_change = dataframes_[0].pct_change().mean(axis=0)
+ax[1].plot(stockdf['AAPL'], color='darkblue', linewidth=0.8)
 
 
 threshold = 0.9
@@ -47,7 +55,6 @@ G = G.subgraph(list(G.nodes)[:100])
 
 pos = nx.spring_layout(G)
 
-G.nodes
 
 # Draw edges
 # TODO: (Cumulative) Redraw edges every frame depending on correlation for that week?
@@ -62,12 +69,14 @@ gray2green = list(Color('gray').range_to(Color('green'), percentage_change_range
 
 def animate(year):
     # Set title at top of plot to week number
-    fig.suptitle(f'Yearly change)')
+    # fig.suptitle(f'Yearly change)')
     # Get stock prices for this week
     stockprices = dataframes_[year]
 
     first_stockprices = dataframes_[year].iloc[0]
     last_stockprices = dataframes_[year].iloc[-1]
+    
+    current_correlation = corr_[year]
 
     # Calculate percentage change
     change = ((last_stockprices - first_stockprices) / first_stockprices) * 100
@@ -112,17 +121,15 @@ def animate(year):
     # # new_G = relabel_graph(new_G, stockdf.columns) # relabel nodes
             
     # Get correlation matrix
-    A = get_corr_matrix(stockdf.iloc[:week+1], threshold=threshold)
+    A = corr_[year]
     # G = nx.read_gexf(f'./data/stockcorr_t{threshold}.gexf')
     #standerd scaling
-    mask = A != 0
-    A[mask] = (A[mask] - A[mask].mean()) / A[mask].std()
     new_G = nx.from_numpy_matrix(A, create_using=nx.Graph)
     # Get only first x nodes
     new_G = new_G.subgraph(list(new_G.nodes)[:100])
     # Copy new_G to prevent frozen graph
     new_G = new_G.copy()
-    new_G = relabel_graph(new_G, stockdf.columns) # relabel nodes  
+    new_G = relabel_graph(new_G, dataframes_[year].columns) # relabel nodes  
 
     # Clear ax[0] (top subplot)
     ax[0].clear()
@@ -142,11 +149,11 @@ def animate(year):
     nx.draw_networkx_nodes(new_G, pos=pos, node_color=colors, node_size=20, ax=ax[0])
 
     # Plot current data on ax[1]
-    ax[1].lines[0].set_data(stockdf['COMP'][:week+1].index, stockdf['COMP'][:week+1])
-    # Plot dot on every week
-    ax[1].scatter(stockdf['COMP'][:week+1].index, stockdf['COMP'][:week+1], s=1, color='darkblue')
+    ax[1].lines[0].set_data(dataframes_[year]['AAPL'][:year+1].index, stockdf['AAPL'][:week+1])
+    # Plot dot on every year
+    ax[1].scatter(stockdf['AAPL'][:year+1].index, stockdf['AAPL'][:week+1], s=1, color='darkblue')
     # Plot dot on future weeks
-    ax[1].scatter(stockdf['COMP'][week+1:].index, stockdf['COMP'][week+1:], s=1, color='lightgray')
+    ax[1].scatter(stockdf['AAPL'][year+1:].index, stockdf['AAPL'][week+1:], s=1, color='lightgray')
 
     # Plot COMP stock with green line if price increased and red if it decreased
     # ax[1].plot(stockdf['COMP'][0:week+1], color='g' if stockprices['COMP'] > last_stockprices['COMP'] else 'r')
@@ -159,5 +166,5 @@ def animate(year):
     return fig
 
 
-ani = animation.FuncAnimation(fig, animate, frames=years, interval=500, repeat=True)
+ani = animation.FuncAnimation(fig, animate, frames=years, interval=2000, repeat=True)
 plt.show()
