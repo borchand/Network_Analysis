@@ -62,10 +62,10 @@ def merge_data_to_csv(datasets, etfs):
                 # cut off data before datetime of 2005-01-01
                 df = df[df["Date"] >= cut_off_date]
                 df_list.append(df)
-                if symbol == 'AAPL':
-                    df['Close'].plot()
-                    plt.show()
-                tickers.add(symbol)
+                # if symbol == 'AAPL':
+                #     df['Close'].plot()
+                #     plt.show()
+                # tickers.add(symbol)
 
         # Create a dataframe with all the data, including a column with the file name
         print("Concatenating %s" % dataset + "...")
