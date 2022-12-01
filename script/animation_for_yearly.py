@@ -5,10 +5,8 @@ from colour import Color
 from matplotlib import animation
 from matplotlib import pyplot as plt
 
-from stockcorr import get_corr_matrix, relabel_graph
+from stockcorr import relabel_graph
 import collective_weight_functions as cwf
-
-# TODO IMPORTANT CHANGE AX1 PLOT FROM AAPL TO MARKET INDEX
 
 # Animate stocks so they go green if their price increases and red if it decreases
 years = 18
@@ -18,6 +16,11 @@ stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv')
 
 corr_, total_sum, dataframes_ = cwf.split_into_years(stockdf)
 
+nasdaq_price = pd.read_csv('../data/nasdaq_index.csv')
+# Turn year_df indexes into datetime
+nasdaq_price.index = pd.to_datetime(nasdaq_price['Date'])
+# Get first row in each year from dataframes_combined
+dataframes_combined_yearly = nasdaq_price.groupby(nasdaq_price.index.year).first()
 
 ## make date into datetime object
 stockdf['Date'] = pd.to_datetime(stockdf['Date'])
@@ -38,9 +41,10 @@ ax[1].spines['bottom'].set_linewidth(0.5)
 ax[1].spines['left'].set_linewidth(0.5)
 # Plot initial data on ax[1] (bottom subplot)
 ## Get the average % change in price for each date
-avg_change = dataframes_[0].pct_change().mean(axis=0)
-ax[1].plot(stockdf['AAPL'], color='darkblue', linewidth=0.8)
-
+# avg_change = dataframes_[0].pct_change().mean(axis=0)
+ax[1].plot(dataframes_combined_yearly['Close'], color='darkblue', linewidth=0.8)
+# Make x ticks only display full year
+ax[1].xaxis.set_major_locator(plt.MaxNLocator(10))
 
 threshold = 0.9
 
@@ -55,9 +59,7 @@ G = G.subgraph(list(G.nodes)[:100])
 
 pos = nx.spring_layout(G)
 
-
 # Draw edges
-# TODO: (Cumulative) Redraw edges every frame depending on correlation for that week?
 nx.draw_networkx_edges(G, pos=pos, alpha=.1, ax=ax[0])
 # Draw labels
 nx.draw_networkx_labels(G, pos=pos, font_size=7, ax=ax[0])
@@ -70,14 +72,14 @@ gray2green = list(Color('gray').range_to(Color('green'), percentage_change_range
 def animate(year):
     # Set title at top of plot to week number
     # fig.suptitle(f'Yearly change)')
+    fig.suptitle(f'Year {dataframes_combined_yearly.index[year]}')
+
     # Get stock prices for this week
     stockprices = dataframes_[year]
 
     first_stockprices = dataframes_[year].iloc[0]
     last_stockprices = dataframes_[year].iloc[-1]
     
-    current_correlation = corr_[year]
-
     # Calculate percentage change
     change = ((last_stockprices - first_stockprices) / first_stockprices) * 100
     mean_change = np.mean(change)
@@ -86,8 +88,7 @@ def animate(year):
     colors = []
     for node in G.nodes:
         # Get percentage change
-        pc = change[node]   
-        print(pc)     
+        pc = change[node]           
         # Get color
         if pc > 0:
             color = gray2green[min(percentage_change_range-1-5, int(pc))]
@@ -97,29 +98,7 @@ def animate(year):
             colors.append(color.hex)
         else:
             colors.append('#808080')
-
-            
-    # # Calculate node correlation from first week up until current week 
-    # # Step 1: Create df with data from first week up until current week
-    # intermediate_df = stockdf.iloc[:week+1]
-    # # Step 2: Calculate correlation
-    # numpy_correlations = intermediate_df.corr().to_numpy()
-    # # Step 3: Cutoff correlation values with threshold
-    # if threshold != 0:
-    #     # Where the absolute value of the correlation is smaller than the threshold, set it to 0
-    #     numpy_correlations = np.where(abs(numpy_correlations) > threshold, numpy_correlations, 0)
-    # # Where the correlation is 1, set it to 0
-    # numpy_correlations = np.where(numpy_correlations == 1, 0, numpy_correlations)
-    # # TODO: Standard scale?
-    # # mask = numpy_correlations != 0
-    # # numpy_correlations[mask] = (numpy_correlations[mask] - numpy_correlations[mask].mean()) / numpy_correlations[mask].std()
-
-    # # Step 4: Create graph from correlation matrix
-    # new_G = nx.from_numpy_matrix(numpy_correlations, create_using=nx.Graph)
-    # # Get only first x nodes
-    # new_G = new_G.subgraph(list(new_G.nodes)[:100])
-    # # new_G = relabel_graph(new_G, stockdf.columns) # relabel nodes
-            
+ 
     # Get correlation matrix
     A = corr_[year]
     # G = nx.read_gexf(f'./data/stockcorr_t{threshold}.gexf')
@@ -139,27 +118,19 @@ def animate(year):
     
     # Draw labels
     nx.draw_networkx_labels(new_G, pos=pos, font_size=7, ax=ax[0])
-
-
-    # nx.draw_networkx_edges(new_G, pos=pos, alpha=.1, ax=ax[0])
-
-    
-            
+         
     # Draw nodes
     nx.draw_networkx_nodes(new_G, pos=pos, node_color=colors, node_size=20, ax=ax[0])
 
     # Plot current data on ax[1]
-    ax[1].lines[0].set_data(dataframes_[year]['AAPL'][:year+1].index, stockdf['AAPL'][:week+1])
+    ax[1].lines[0].set_data(dataframes_combined_yearly['Close'][:year+1].index, dataframes_combined_yearly['Close'][:year+1])
     # Plot dot on every year
-    ax[1].scatter(stockdf['AAPL'][:year+1].index, stockdf['AAPL'][:week+1], s=1, color='darkblue')
+    ax[1].scatter(dataframes_combined_yearly['Close'][:year+1].index, dataframes_combined_yearly['Close'][:year+1], s=1, color='darkblue')
     # Plot dot on future weeks
-    ax[1].scatter(stockdf['AAPL'][year+1:].index, stockdf['AAPL'][week+1:], s=1, color='lightgray')
-
-    # Plot COMP stock with green line if price increased and red if it decreased
-    # ax[1].plot(stockdf['COMP'][0:week+1], color='g' if stockprices['COMP'] > last_stockprices['COMP'] else 'r')
+    ax[1].scatter(dataframes_combined_yearly['Close'][year+1:].index, dataframes_combined_yearly['Close'][year+1:], s=1, color='lightgray')
 
     # Set y axis label
-    ax[1].set_ylabel('Overall Market (USD)')
+    ax[1].set_ylabel('NASDAQ (USD)')
     # Tilt ax[1] x-labels
     plt.setp(ax[1].get_xticklabels(), rotation=90,)
 
