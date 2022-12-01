@@ -49,7 +49,8 @@ G = nx.from_numpy_matrix(A, create_using=nx.Graph)
 G = relabel_graph(G, stockdf.columns) # relabel nodes
 
 # Get only first x nodes
-G = G.subgraph(list(G.nodes)[:100])
+num_nodes_to_keep = 100
+G = G.subgraph(list(G.nodes)[:num_nodes_to_keep])
 
 pos = nx.spring_layout(G)
 
@@ -100,7 +101,7 @@ def animate(week):
     A[mask] = (A[mask] - A[mask].mean()) / A[mask].std()
     new_G = nx.from_numpy_matrix(A, create_using=nx.Graph)
     # Get only first x nodes
-    new_G = new_G.subgraph(list(new_G.nodes)[:100])
+    new_G = new_G.subgraph(list(new_G.nodes)[:num_nodes_to_keep])
     # Copy new_G to prevent frozen graph
     new_G = new_G.copy()
     new_G = relabel_graph(new_G, stockdf.columns) # relabel nodes  
