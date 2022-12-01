@@ -12,7 +12,7 @@ weeks = 52
 
 # Load stock data csv
 # Format is: stocks as columns and dates as rows
-stockdf = pd.read_csv('./data/stock_market_data/stockdf.csv', index_col=0)
+stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv', index_col=0)
 
 # Get subset of data in weeks
 stockdf = stockdf.iloc[-weeks*5:]
@@ -54,7 +54,6 @@ G = G.subgraph(list(G.nodes)[:100])
 pos = nx.spring_layout(G)
 
 # Draw edges
-# TODO: (Cumulative) Redraw edges every frame depending on correlation for that week?
 nx.draw_networkx_edges(G, pos=pos, alpha=.1, ax=ax[0])
 # Draw labels
 nx.draw_networkx_labels(G, pos=pos, font_size=7, ax=ax[0])
@@ -68,17 +67,8 @@ def animate(week):
     fig.suptitle(f'Week {week+1} ({stockdf.index[week]})')
     # Get stock prices for this week
     stockprices = stockdf.iloc[week]
-    # Get stock prices for last week
-    if week > 0:
-        # last_stockprices = stockdf.iloc[week-1]
-
-        # Set last stockprices to the stock price for the first week in stockdf.
-        # Then we can calculate the percentage change from the first week to the current week
-        last_stockprices = stockdf.iloc[0]
-    else:
-        # If we are on the first week we can't calculate the percentage change, so we just set last_stockprices equal to the current stockprices
-        last_stockprices = stockprices
-
+    # Get stock prices for first week
+    last_stockprices = stockdf.iloc[0]
 
     # Calculate percentage change
     change = ((stockprices - last_stockprices) / last_stockprices) * 100
@@ -101,28 +91,7 @@ def animate(week):
         else:
             colors.append('#808080')
 
-            
-    # # Calculate node correlation from first week up until current week 
-    # # Step 1: Create df with data from first week up until current week
-    # intermediate_df = stockdf.iloc[:week+1]
-    # # Step 2: Calculate correlation
-    # numpy_correlations = intermediate_df.corr().to_numpy()
-    # # Step 3: Cutoff correlation values with threshold
-    # if threshold != 0:
-    #     # Where the absolute value of the correlation is smaller than the threshold, set it to 0
-    #     numpy_correlations = np.where(abs(numpy_correlations) > threshold, numpy_correlations, 0)
-    # # Where the correlation is 1, set it to 0
-    # numpy_correlations = np.where(numpy_correlations == 1, 0, numpy_correlations)
-    # # TODO: Standard scale?
-    # # mask = numpy_correlations != 0
-    # # numpy_correlations[mask] = (numpy_correlations[mask] - numpy_correlations[mask].mean()) / numpy_correlations[mask].std()
-
-    # # Step 4: Create graph from correlation matrix
-    # new_G = nx.from_numpy_matrix(numpy_correlations, create_using=nx.Graph)
-    # # Get only first x nodes
-    # new_G = new_G.subgraph(list(new_G.nodes)[:100])
-    # # new_G = relabel_graph(new_G, stockdf.columns) # relabel nodes
-            
+          
     # Get correlation matrix
     A = get_corr_matrix(stockdf.iloc[:week+1], threshold=threshold)
     # G = nx.read_gexf(f'./data/stockcorr_t{threshold}.gexf')
@@ -136,20 +105,13 @@ def animate(week):
     new_G = new_G.copy()
     new_G = relabel_graph(new_G, stockdf.columns) # relabel nodes  
 
-        # Clear ax[0] (top subplot)
+    # Clear ax[0] (top subplot)
     ax[0].clear()
 
     # Draw the edges of the new graph
-    nx.draw_networkx_edges(new_G, pos=pos, alpha=.1, ax=ax[0])
-    
+    nx.draw_networkx_edges(new_G, pos=pos, alpha=.1, ax=ax[0])    
     # Draw labels
     nx.draw_networkx_labels(new_G, pos=pos, font_size=7, ax=ax[0])
-
-
-    # nx.draw_networkx_edges(new_G, pos=pos, alpha=.1, ax=ax[0])
-
-    
-            
     # Draw nodes
     nx.draw_networkx_nodes(new_G, pos=pos, node_color=colors, node_size=20, ax=ax[0])
 

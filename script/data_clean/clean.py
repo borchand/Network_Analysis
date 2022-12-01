@@ -3,17 +3,29 @@ import glob
 import os
 import numpy as np
 import sys
-
-
+from sys import platform
+from matplotlib import pyplot as plt
 import pandas as pd
 from tqdm import tqdm
 
 # set working directory to current directory
-path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
-dir = os.path.dirname(path) #point to a directory
-os.chdir(dir)
+if platform == "darwin" or platform == "linux":
+    path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
+    os.chdir(path)
+else:
+    path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
+    dir = os.path.dirname(path) #point to a directory
+    os.chdir(dir)
 
 def find_ETFs(datasets):
+    """Find All non stocks from all json files
+
+    Args:
+        datasets (list): list of names of stock exchanges
+
+    Returns:
+        set: set containing all stocks
+    """    
     x = set()
     print("find ETF's...")
     for dataset in datasets:
@@ -50,6 +62,9 @@ def merge_data_to_csv(datasets, etfs):
                 # cut off data before datetime of 2005-01-01
                 df = df[df["Date"] >= cut_off_date]
                 df_list.append(df)
+                if symbol == 'AAPL':
+                    df['Close'].plot()
+                    plt.show()
                 tickers.add(symbol)
 
         # Create a dataframe with all the data, including a column with the file name
@@ -167,6 +182,7 @@ def clean_data(run_all=False):
     print(f"Total amount of tickers after cleaning: {len(stockdf.columns)}")
 
 if __name__ == '__main__':
+    print(platform)
     if len(sys.argv) > 1:
         run_all = sys.argv[1].lower()[0] == "t"
     else:
