@@ -48,6 +48,7 @@ def create_df(datasets, etfs):
     df = pd.DataFrame()
     df.index = pd.date_range(start='2005-1-1',end= '2023-1-1') 
 
+
     for dataset in datasets:
         print(f'reading JSON for {dataset}')
         # Get all files from /data/stock_market_data/dataset/csv
