@@ -12,7 +12,7 @@ weeks = 52
 
 # Load stock data csv
 # Format is: stocks as columns and dates as rows
-stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv', index_col=0)
+stockdf = pd.read_csv('../../data/stock_market_data/stockdf.csv', index_col=0)
 
 # Get subset of data in weeks
 stockdf = stockdf.iloc[-weeks*5:]

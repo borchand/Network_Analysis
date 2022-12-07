@@ -28,9 +28,9 @@ def get_corr_matrix(df, threshold=0.9, from_file=False):
         A = np.where(A == 1, 0, A)
         return A
     threshString = str(threshold).lstrip('0.')
-    if os.path.isfile(f'../data/corr_matrix_t{threshString}.npy'):
+    if os.path.isfile(f'../../data/corr_matrix_t{threshString}.npy'):
         print('loading corr matrix from file')
-        return np.load(f'../data/corr_matrix_t{threshString}.npy')
+        return np.load(f'../../data/corr_matrix_t{threshString}.npy')
     else:
         print('calculating corr matrix')
         A = df.corr().to_numpy()
@@ -38,7 +38,7 @@ def get_corr_matrix(df, threshold=0.9, from_file=False):
         if threshold != 0:
             A = np.where(abs(A) > threshold, A, 0)
         A = np.where(A == 1, 0, A)
-        with open(f'../data/corr_matrix_t{threshString}.npy', 'wb') as f:
+        with open(f'../../data/corr_matrix_t{threshString}.npy', 'wb') as f:
             np.save(f, A)
             return A
 
@@ -71,7 +71,7 @@ def get_neighborhood(G, node, depth=1):
 thresh = .9
 
 
-stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv', index_col=0)
+stockdf = pd.read_csv('../../data/stock_market_data/stockdf.csv', index_col=0)
 startlen = len(stockdf.columns)
 stockdf = stockdf.dropna(axis=1, how='all')
 print(f'dropped {startlen-len(stockdf.columns)} columns')
