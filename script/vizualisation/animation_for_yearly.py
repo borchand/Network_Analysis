@@ -14,7 +14,7 @@ years = 18
 # Format is: stocks as columns and dates as rows
 stockdf = pd.read_csv('../../data/stock_market_data/stockdf.csv')
 
-corr_, total_sum, dataframes_ = cwf.split_into_years(stockdf)
+corr_, total_sum, dataframes_ = cwf.split_into_years()
 
 nasdaq_price = pd.read_csv('../../data/nasdaq_index.csv')
 # Turn year_df indexes into datetime
