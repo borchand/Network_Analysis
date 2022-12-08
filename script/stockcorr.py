@@ -1,6 +1,7 @@
 #stock correlation network
 import os
 
+from sys import platform
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
