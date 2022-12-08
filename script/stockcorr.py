@@ -1,6 +1,7 @@
 #stock correlation network
 import os
 
+from sys import platform
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -8,12 +9,16 @@ import pandas as pd
 from networkx.algorithms import community
 from scipy.sparse.csgraph import minimum_spanning_tree
 
-
 # set working directory to current directory
-path = os.path.realpath(__file__).rsplit("/", 1)[0]
-os.chdir(path)
+if platform == "darwin" or platform == "linux":
+    path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
+    os.chdir(path)
+else:
+    path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
+    dir = os.path.dirname(path) #point to a directory
+    os.chdir(dir)
 
-def get_corr_matrix(df, threshold=0.9, from_file=False):
+def get_corr_matrix(df, threshold=0.9, from_file=False, verbose=True):
     """Calculate correlation given between column in dataframe.
     To include all columns, set threshold to 0, fx when constructing MST
 
@@ -42,9 +47,10 @@ def get_corr_matrix(df, threshold=0.9, from_file=False):
         return np.load(f'../data/corr_matrix_t{threshString}.npy')
 
     else:
-        print('calculating corr matrix')
         A = df.corr().to_numpy()
-        print(f'A has {np.isnan(A).sum()} nan values')
+        if verbose:
+            print('calculating corr matrix')
+            print(f'A has {np.isnan(A).sum()} nan values')
 
         if threshold != 0:
             A = np.where(abs(A) > threshold, A, 0)
