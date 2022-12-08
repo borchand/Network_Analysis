@@ -1,7 +1,7 @@
 #stock correlation network
 import os
-
 from sys import platform
+
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -30,9 +30,10 @@ def get_corr_matrix(df, threshold=0.9, from_file=False, verbose=True):
             ndarray: correlation matrix
     """
     if from_file == False:
-        print('calculating corr matrix')
         A = df.corr().to_numpy()
-        print(f'A has {np.isnan(A).sum()} nan values')
+        if verbose:
+            print('calculating corr matrix')
+            print(f'A has {np.isnan(A).sum()} nan values')
 
         if threshold != 0:
             A = np.where(abs(A) > threshold, A, 0)
