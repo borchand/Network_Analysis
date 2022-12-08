@@ -53,7 +53,7 @@ def main():
     # G_without_max_degree = mst_and_relabel(stockdf.drop(columns=['BSAC']))
     # draw_mst([G, G_without_max_degree])
     
-    # corr_net = create_corr_net(stockdf, 0.9)
+    corr_net = create_corr_net(stockdf, 0.9)
     # nx.draw(corr_net, with_labels=False, node_size=10, alpha=.6, width=1)
     # plt.show()
 
