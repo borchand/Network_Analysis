@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import stockcorr as sc
 from networkx.algorithms import community
+from tqdm import tqdm
 
 
 def split_into_years(threshold = 0.9, one_hot_where=False):
@@ -72,15 +73,15 @@ def soting_indexes(list_of_lists:list[list]):
             found = False
             for i in range(len(intersects)):
                 if stored_idx == intersects[i][1]:
-                    final_list.append(list_of_lists[intersects[i][2]])
                     if intersects[i][2] in idx_in_list:
+                        final_list.append(list_of_lists[intersects[i][2]])
                         idx_in_list.remove(intersects[i][2])
                     found = True
                     break
                 
                 elif stored_idx == intersects[i][2]:
-                    final_list.append(list_of_lists[intersects[i][1]])
                     if intersects[i][1] in idx_in_list:
+                        final_list.append(list_of_lists[intersects[i][1]])
                         idx_in_list.remove(intersects[i][1])
                     found = True
 
