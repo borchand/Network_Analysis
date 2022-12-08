@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..") 
+
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -12,11 +15,11 @@ import collective_weight_functions as cwf
 years = 18
 # Load stock data csv
 # Format is: stocks as columns and dates as rows
-stockdf = pd.read_csv('../../data/stock_market_data/stockdf.csv')
+stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv')
 
 corr_, total_sum, dataframes_ = cwf.split_into_years()
 
-nasdaq_price = pd.read_csv('../../data/nasdaq_index.csv')
+nasdaq_price = pd.read_csv('../data/nasdaq_index.csv')
 # Turn year_df indexes into datetime
 nasdaq_price.index = pd.to_datetime(nasdaq_price['Date'])
 # Get first row in each year from dataframes_combined
