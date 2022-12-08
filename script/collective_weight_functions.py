@@ -38,7 +38,7 @@ def split_into_years(threshold = 0.9, one_hot_where=False):
     return corr_list, total_sum, dataframes_
 
 
-def soting_indexes(list_of_lists:list[list]):
+def sorting_indexes(list_of_lists:list[list]):
     intersects = []
 
     for i in range(len(list_of_lists)):
@@ -60,11 +60,11 @@ def soting_indexes(list_of_lists:list[list]):
     stored_idx = None
     while idx_in_list != []:
         if stored_idx == None:
-            final_list.append(list_of_lists[intersects[0][1]])
-            final_list.append(list_of_lists[intersects[0][2]])
             if intersects[0][1] in idx_in_list:
+                final_list.append(list_of_lists[intersects[0][1]])
                 idx_in_list.remove(intersects[0][1])
             if intersects[0][2] in idx_in_list:
+                final_list.append(list_of_lists[intersects[0][2]])
                 idx_in_list.remove(intersects[0][2])
             stored_idx = intersects[0][2]
             intersects.pop(0)
@@ -77,6 +77,8 @@ def soting_indexes(list_of_lists:list[list]):
                         final_list.append(list_of_lists[intersects[i][2]])
                         idx_in_list.remove(intersects[i][2])
                     found = True
+                    
+                    intersects.pop(i)
                     break
                 
                 elif stored_idx == intersects[i][2]:

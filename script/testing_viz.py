@@ -39,26 +39,7 @@ def main():
     communities_list = communities.communities
     print(len(communities_list))
 
-    com_idx_sort = cw.soting_indexes(communities_list)
-    len(com_idx_sort)
-
-    # sort nodes by community
-    com_idx = list(itertools.chain.from_iterable(communities_list))
-
-    # remove duplicates after first occurence but keep order
-    com_idx_sort = []
-    count = 0
-    for i in com_idx:
-        if i not in com_idx_sort:
-            com_idx_sort.append(i)
-        else:
-            count += 1
-    print(count)
-
-    for i in range(nodes):
-        if i not in com_idx_sort:
-            com_idx_sort.append(i)
-
+    com_idx_sort = cw.sorting_indexes(communities_list)
     len(com_idx_sort)
 
     # get adjacency matrix of G
