@@ -7,9 +7,9 @@ import pandas as pd
 from colour import Color
 from matplotlib import animation
 from matplotlib import pyplot as plt
+import stockcorr as sc
 
 from stockcorr import relabel_graph
-import collective_weight_functions as cwf
 
 # Animate stocks so they go green if their price increases and red if it decreases
 years = 18
@@ -17,7 +17,7 @@ years = 18
 # Format is: stocks as columns and dates as rows
 stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv')
 
-corr_, total_sum, dataframes_ = cwf.split_into_years()
+corr_, total_sum, dataframes_ = sc.split_into_years()
 
 nasdaq_price = pd.read_csv('../data/nasdaq_index.csv')
 # Turn year_df indexes into datetime
