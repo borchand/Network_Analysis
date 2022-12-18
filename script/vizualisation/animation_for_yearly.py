@@ -1,33 +1,30 @@
 import sys
-sys.path.append("..") 
-
 import networkx as nx
 import numpy as np
 import pandas as pd
 from colour import Color
 from matplotlib import animation
 from matplotlib import pyplot as plt
+
+sys.path.append('./script')
+
 import stockcorr as sc
 
-from stockcorr import relabel_graph
+# from stockcorr import relabel_graph
 
 # Animate stocks so they go green if their price increases and red if it decreases
 years = 18
 # Load stock data csv
 # Format is: stocks as columns and dates as rows
-stockdf = pd.read_csv('../data/stock_market_data/stockdf.csv')
+stockdf = pd.read_csv('../data/all_ticker_data.csv')
 
 corr_, total_sum, dataframes_ = sc.split_into_years()
 
 nasdaq_price = pd.read_csv('../data/nasdaq_index.csv')
-# Turn year_df indexes into datetime
+# # Turn year_df indexes into datetime
 nasdaq_price.index = pd.to_datetime(nasdaq_price['Date'])
 # Get first row in each year from dataframes_combined
 dataframes_combined_yearly = nasdaq_price.groupby(nasdaq_price.index.year).first()
-
-## make date into datetime object
-stockdf['Date'] = pd.to_datetime(stockdf['Date'])
-stockdf = stockdf.set_index('Date')
 
 # Create subplot with network on top and small graph on bottom
 fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
@@ -55,7 +52,7 @@ threshold = 0.9
 A = corr_[0]
 # G = nx.read_gexf(f'./data/stockcorr_t{threshold}.gexf')
 G = nx.from_numpy_matrix(A, create_using=nx.Graph)
-G = relabel_graph(G, dataframes_[0].columns) # relabel nodes
+G = sc.relabel_graph(G, dataframes_[0].columns) # relabel nodes
 
 # Get only first x nodes
 G = G.subgraph(list(G.nodes)[:100])
@@ -76,9 +73,6 @@ def animate(year):
     # Set title at top of plot to week number
     # fig.suptitle(f'Yearly change)')
     fig.suptitle(f'Year {dataframes_combined_yearly.index[year]}')
-
-    # Get stock prices for this week
-    stockprices = dataframes_[year]
 
     first_stockprices = dataframes_[year].iloc[0]
     last_stockprices = dataframes_[year].iloc[-1]
@@ -111,7 +105,7 @@ def animate(year):
     new_G = new_G.subgraph(list(new_G.nodes)[:100])
     # Copy new_G to prevent frozen graph
     new_G = new_G.copy()
-    new_G = relabel_graph(new_G, dataframes_[year].columns) # relabel nodes  
+    new_G = sc.relabel_graph(new_G, dataframes_[year].columns) # relabel nodes  
 
     # Clear ax[0] (top subplot)
     ax[0].clear()
@@ -140,5 +134,5 @@ def animate(year):
     return fig
 
 
-ani = animation.FuncAnimation(fig, animate, frames=years, interval=2000, repeat=True)
+ani = animation.FuncAnimation(fig, animate, frames=years, interval=1000, repeat=True)
 plt.show()
