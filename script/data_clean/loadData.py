@@ -40,6 +40,27 @@ def find_ETFs(datasets):
                     x.add(symbol)
     return x
 
+
+def getTickers():
+    datasets = [
+        "nyse",
+        "nasdaq",
+        "forbes2000",
+        "sp500"
+    ]
+      
+    etfs = find_ETFs(datasets)
+    symbolSet = set()
+    for dataset in datasets:
+        all_files = glob.glob(f"../../data/stock_market_data/{dataset}/csv/*.csv")
+
+        print('len of all files: ', len(all_files))
+        for file in all_files:
+            
+            symbolSet.add(file.split("/")[-1].split(".")[0])
+    
+    return symbolSet-etfs 
+
 def clean_data(run_all=False):
     datasets = [
         "nyse",
