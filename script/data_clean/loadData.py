@@ -1,20 +1,14 @@
 import datetime
 import glob
 import os
-import numpy as np
 import sys
 from sys import platform
-from matplotlib import pyplot as plt
+
+import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-if platform == "darwin":
-    path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
-    os.chdir(path)
-else:
-    path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
-    dir = os.path.dirname(path) #point to a directory
-    os.chdir(dir)
 
 def find_ETFs(datasets):
     """Find All non stocks from all json files
@@ -113,6 +107,20 @@ def clean_data(run_all=False):
     df.drop(list(df.filter(regex = '_')), axis = 1, inplace = True)
     return df
 
-df = clean_data(run_all = True)
 
-df.to_csv('../../data/Stockdf.csv', index=True)
+def main():
+    if platform == "darwin":
+        path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
+        os.chdir(path)
+    else:
+        path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
+        dir = os.path.dirname(path) #point to a directory
+        os.chdir(dir)
+
+    df = clean_data(run_all = True)
+
+    df.to_csv('../../data/Stockdf.csv', index=True)
+
+
+if __name__ == '__main__':
+    main()

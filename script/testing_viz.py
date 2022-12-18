@@ -1,6 +1,6 @@
 import itertools
 
-import collective_weight_functions as cw
+import stockcorr as sc
 import matplotlib.pyplot as plt
 import networkx as nx
 import networkx.algorithms.community as nx_comm
@@ -9,7 +9,7 @@ from cdlib import algorithms
 
 
 def main():
-    corr_list, total_sum, dataframes_ = cw.split_into_years(threshold=0.95, one_hot_where=True)
+    corr_list, total_sum, dataframes_ = sc.split_into_years(threshold=0.95, one_hot_where=True)
     
     G = nx.from_numpy_matrix(corr_list[0], create_using=nx.Graph)
 
@@ -39,7 +39,7 @@ def main():
     communities_list = communities.communities
     print(len(communities_list))
 
-    com_idx_sort = cw.sorting_indexes(communities_list)
+    com_idx_sort = sc.sorting_indexes(communities_list)
     len(com_idx_sort)
 
     # get adjacency matrix of G
