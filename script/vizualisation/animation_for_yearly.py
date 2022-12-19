@@ -54,8 +54,15 @@ A = corr_[0]
 G = nx.from_numpy_matrix(A, create_using=nx.Graph)
 G = sc.relabel_graph(G, dataframes_[0].columns) # relabel nodes
 
-# Get only first x nodes
-G = G.subgraph(list(G.nodes)[:100])
+# Check if all stocks_to_include are in G
+cluster_centers_indices = np.array([  16,   26,  115,  127,  192,  224,  248,  270,  310,  312,  326,
+        371,  527,  536,  593,  673,  723,  748,  759,  776, 1029, 1044,
+       1058, 1120, 1125, 1184, 1259, 1323, 1370, 1387, 1438, 1476, 1580,
+       1597, 1628, 1696, 1760, 1765, 1783, 1792, 1805, 1880, 1958, 2041,
+       2066, 2218, 2238, 2330, 2339, 2439, 2463, 2487, 2652, 2764, 2959])
+
+# Get a sub graph only containing the stocks from cluster_centers_indices
+G = G.subgraph(np.array(G.nodes)[cluster_centers_indices])
 
 pos = nx.spring_layout(G)
 
@@ -102,7 +109,8 @@ def animate(year):
     #standerd scaling
     new_G = nx.from_numpy_matrix(A, create_using=nx.Graph)
     # Get only first x nodes
-    new_G = new_G.subgraph(list(new_G.nodes)[:100])
+    # new_G = new_G.subgraph(stocks_to_include)
+    new_G = new_G.subgraph(np.array(new_G.nodes)[cluster_centers_indices])
     # Copy new_G to prevent frozen graph
     new_G = new_G.copy()
     new_G = sc.relabel_graph(new_G, dataframes_[year].columns) # relabel nodes  
@@ -135,4 +143,7 @@ def animate(year):
 
 
 ani = animation.FuncAnimation(fig, animate, frames=years, interval=1000, repeat=True)
-plt.show()
+# plt.show()
+
+# Save as gif
+ani.save('yearly_change.gif', writer='imagemagick', fps=1)
