@@ -199,4 +199,3 @@ data/stock_market_data
 .DS_Store
 
 malthe-eda.ipynb
-data/all_ticker_data.csv
