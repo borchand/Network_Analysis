@@ -6,6 +6,7 @@ import pandas as pd
 import networkx as nx
 import sklearn.cluster as cluster
 import pickle
+from tqdm import tqdm
 
 # set working directory to current directory
 if platform == "darwin" or platform == "linux":
@@ -90,10 +91,11 @@ def main():
     corr_df = get_corr_from_year(2021, df_years, min_year, debug=True)
     
     print(corr_df.shape)
+    for year in tqdm(range(min_year, max_year+1)):
+
+        save_affinity_propagation_from_year(corr_df, year)
     
-    save_affinity_propagation_from_year(corr_df, 2021, debug=True)
-    
-    read_affinity_propagation_from_year(2021)
+    affinity_propagation = read_affinity_propagation_from_year(2021, debug=True)
     
 
 
