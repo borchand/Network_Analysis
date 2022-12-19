@@ -110,7 +110,7 @@ def graph_from_corr_matrix(A, threshold=0, from_file=False):
 
 def split_into_years(threshold = 0.9, cor_edge_weight=False):
     ## IMPORTANT: Only works when index is not the date column
-    stock_df = pd.read_csv('../data/stock_market_data/stockdf.csv', index_col=0)
+    stock_df = pd.read_csv('../data/all_ticker_data.csv', index_col=0) # Changed from ../data/stock_market_data/stockdf.csv
     stock_df['Date'] = pd.to_datetime(stock_df.index)
     first_date = stock_df['Date'].dt.year.drop_duplicates()
 
