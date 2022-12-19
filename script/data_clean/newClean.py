@@ -39,7 +39,7 @@ def get_corr_from_year(year, df_years, min_year):
 def main():
     df_years, min_year, max_year = get_data()
 
-    corr_df = get_corr_from_year(df, 2020, years, min_year)
+    corr_df = get_corr_from_year(2020, df_years, min_year)
     
     print(corr_df.shape)
 
