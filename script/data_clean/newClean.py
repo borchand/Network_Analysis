@@ -1,7 +1,8 @@
-import pandas as pd
-import numpy as np
 import os
 from sys import platform
+
+import numpy as np
+import pandas as pd
 
 # set working directory to current directory
 if platform == "darwin" or platform == "linux":
@@ -11,7 +12,8 @@ else:
     path = os.path.realpath(__file__).rsplit("/", 1)[0] #point to a file
     dir = os.path.dirname(path) #point to a directory
     os.chdir(dir)
-    
+
+
 def get_data():
     df = pd.read_csv('../../data/all_ticker_data.csv', index_col=0, parse_dates=True)
     
@@ -22,6 +24,7 @@ def get_data():
 
     return df_years, min_year, max_year
 
+
 def get_corr_from_year(year, df_years, min_year):
     year_data = df_years[year - min_year]
 
@@ -31,10 +34,18 @@ def get_corr_from_year(year, df_years, min_year):
 
     # drop tickers that don't have data for the year
     year_data = year_data.dropna(axis=1, how='any')
-    
-    corr_df = year_data.corr().to_numpy()
+
+    # convert price data to log returns
+    year_data = np.log(year_data).diff().dropna()
+    log_returns = np.log(year_data).diff()[1:]
+
+    # normalize log returns
+    log_returns = (log_returns - log_returns.mean()) / log_returns.std()
+
+    corr_df = log_returns.corr().to_numpy()
     
     return corr_df
+
 
 def main():
     df_years, min_year, max_year = get_data()
@@ -42,6 +53,7 @@ def main():
     corr_df = get_corr_from_year(2020, df_years, min_year)
     
     print(corr_df.shape)
+
 
 if __name__ == '__main__':
     main()
