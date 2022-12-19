@@ -9,7 +9,7 @@ from cdlib import algorithms
 
 
 def main():
-    corr_list, total_sum, dataframes_ = sc.split_into_years(threshold=0.95, one_hot_where=True)
+    corr_list, total_sum, dataframes_ = sc.split_into_years(threshold=0.95, cor_edge_weight=True)
     
     G = nx.from_numpy_matrix(corr_list[0], create_using=nx.Graph)
 

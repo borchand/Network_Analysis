@@ -88,10 +88,13 @@ thresh = .9
 def main(thresh):
     #get data
 
-    stockdf = pd.read_csv('quickStockdf.csv', index_col=0)
+    stockdf = pd.read_csv('../../data/all_ticker_data.csv', index_col=0)
     startlen = len(stockdf.columns)
     stockdf = stockdf.dropna(axis=1, how='all')
     print(f'dropped {startlen-len(stockdf.columns)} columns')
+    corr = stockdf.corr().to_numpy()
+    np.fill_diagonal(corr, 0)
+
     #create mst from correlation matrix
     A = get_corr_matrix(stockdf, threshold=thresh)
     #standerd scaling
@@ -113,7 +116,7 @@ def main(thresh):
     B = np.where(A == 0, np.where(mst.toarray() != 0, 0.01, 0), A)
     print('creating graph from correlation matrix')
     #create using weighted graph
-    Gcorr = nx.from_numpy_matrix(A, create_using=nx.Graph) 
+    Gcorr = nx.from_numpy_matrix(corr, create_using=nx.Graph) 
     Gadded = nx.from_numpy_matrix(B, create_using=nx.Graph)# convert to graph
 
     Gmst = nx.from_scipy_sparse_matrix(mst) # convert to graph
@@ -121,13 +124,13 @@ def main(thresh):
     Gadded = relabel_graph(Gadded, stockdf.columns) # relabel nodes
     Gmst = relabel_graph(Gmst, stockdf.columns) # relabel nodes
 
-    # print(len(F.nodes))
-    # F.remove_nodes_from(list(nx.isolates(F)))
-    # len(F.nodes)
-    # # Save graph
-    # nx.write_gexf(G, f'../data/stockcorr_t{thresh}.gexf')
+    sub = nx.subgraph(Gcorr, list(Gcorr.nodes)[:1000])
+    #plot first 200 nodes
+    pos = nx.spring_layout(sub)
+    nx.draw_networkx_edges(sub, alpha=.002, width=1, pos=pos)
+    nx.draw_networkx_nodes(sub, node_size=2, pos=pos)
 
-
+    nx.write_gexf(Gcorr, '../gephi.gexf')
     #get list of degrees sorted
     deg = sorted(Gadded.degree, key=lambda x: x[1], reverse=True)
     deg
@@ -136,8 +139,8 @@ def main(thresh):
     fig, ax = plt.subplots(1,4, figsize=(80,20))
     for i, ticker in enumerate(tickerlst):
         ax[i].set_title(ticker)
-        sub = get_neighborhood(Gadded, ticker, 1)
-        H = Gadded.subgraph(sub)
+        sub = get_neighborhood(Gcorr, ticker, 1)
+        H = Gcorr.subgraph(sub)
         nx.draw(H, with_labels=True, ax=ax[i], alpha=.6, node_size=1000, font_size=20, width=1)
     plt.show()
 
@@ -190,7 +193,16 @@ def main(thresh):
             nx.draw_networkx_edges(Gadded.subgraph(get_neighborhood(Gadded, 'AAPL', 1)), pos= pos, alpha=1)
     plt.show()
 
+def plot():
+    stockdf = pd.read_csv('../../data/all_ticker_data.csv', index_col=0)
+    
+    corr = stockdf.corr().to_numpy()
+
+    plt.figure(figsize=(20,20))
+    nx.draw(nx.from_numpy_matrix(corr), with_labels=True, font_size=20)
+    plt.show()
+
 if __name__ == "__main__":
-    main(thresh)
+    plot()
     
 
