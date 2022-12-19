@@ -25,15 +25,13 @@ def get_data():
     return df_years, min_year, max_year
 
 
-def get_corr_from_year(year, df_years, min_year):
+def get_corr_from_year(year, df_years, min_year, to_numpy=True):
     year_data = df_years[year - min_year]
 
     # remove tickers that don't have any variation during the year
-    year_variation = np.var(year_data, axis=0).astype('float16')
-    year_data = year_data[year_variation[year_variation > 0].index]
 
     # drop tickers that don't have data for the year
-    year_data = year_data.dropna(axis=1, how='all')
+    year_data = year_data.dropna(axis=1, how='any')
 
     # convert price data to log returns
     log_returns = np.log(year_data).diff()[1:]
@@ -41,9 +39,12 @@ def get_corr_from_year(year, df_years, min_year):
     # normalize log returns
     log_returns = (log_returns - log_returns.mean()) / log_returns.std()
 
-    corr_df = log_returns.corr().to_numpy()
-    
-    return corr_df
+    return_variation = np.var(log_returns, axis=0).astype('float16')
+    log_returns = year_data[return_variation[return_variation > 0].index]
+
+    corr_df = log_returns.corr()
+
+    return corr_df.to_numpy() if to_numpy else corr_df
 
 
 def main():
