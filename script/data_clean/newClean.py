@@ -33,10 +33,9 @@ def get_corr_from_year(year, df_years, min_year):
     year_data = year_data[year_variation[year_variation > 0].index]
 
     # drop tickers that don't have data for the year
-    year_data = year_data.dropna(axis=1, how='any')
+    year_data = year_data.dropna(axis=1, how='all')
 
     # convert price data to log returns
-    year_data = np.log(year_data).diff().dropna()
     log_returns = np.log(year_data).diff()[1:]
 
     # normalize log returns
