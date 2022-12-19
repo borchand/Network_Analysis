@@ -6,8 +6,6 @@ import networkx as nx
 import pandas as pd
 import numpy as np
 import sys
-sys.path.append(".") 
-import stockcorr as sc 
 from networkx.algorithms import community
 import sklearn.cluster as cluster
 
@@ -18,7 +16,7 @@ def load_data_for_year(year, stockdf):
     years = [stockdf.loc[f'{year}-01-01':f'{year}-12-31'] for year in range(min_year, max_year + 1)]
     year_data = years[year - min_year]
 
-    year_variation = np.var(year_data, axis=0)
+    year_variation = np.var(year_data, axis=0).astype(np.float16)
     year_data = year_data[year_variation[year_variation > 0].index]
 
     # drop tickers that don't have data for the year
@@ -28,7 +26,7 @@ def load_data_for_year(year, stockdf):
     return corr_df
 
 def initialise_clusters(df):
-    G = nx.from_numpy_matrix(corr_df)
+    G = nx.from_numpy_matrix(df)
 
     A = nx.to_scipy_sparse_array(G)
 
@@ -48,39 +46,41 @@ def create_box_data(df,clusters):
     all_data = sorted(all_data, key=lambda x: np.median(x[1]))
     original_index = [x[0] for x in all_data]
     all_data = [x[1] for x in all_data]
-    bp = plt.boxplot(all_data, patch_artist=True)
-    for box in bp["boxes"]:
-        box.set( facecolor='gray')
-    for whisker in bp["whiskers"]:
-        whisker.set(color='orange', linewidth=2)
-    for cap in bp["caps"]:
-        cap.set(color='black', linewidth=2)
-    for median in bp["medians"]:
-        median.set(color='white', linewidth=2)
-    for flier in bp["fliers"]:
-        flier.set(marker='o', color='red')
     
-    return bp, original_index
+    return all_data, original_index
         
 
 
 
+def plot_boxplots(stockdf, years):
 
-
-def main():
-    stockdf = pd.read_csv('../data/all_ticker_data.csv', index_col=0, parse_dates=True)
-    years = [2010,2015,2020,2021]   
     corr_dfs = []
     for year in years:
         corr_dfs.append(load_data_for_year(year, stockdf))
     fig, ax= plt.subplots(len(years),1, figsize=(20,10))
-    for i in range(years):
+    for i in range(len(years)):
         ax[i] = fig.add_axes([0,0,1,1])
-        cluster_ = initialise_clusters(corr_dfs[i])
-        bp, indexes = create_box_data(corr_dfs[i], cluster_)
+        cluster_ = initialise_clusters(corr_dfs[1])
+        bp, indexes = create_box_data(corr_dfs[1], cluster_)
         ax[i].set_xticklabels(indexes)
+        ax[i].boxplot(bp, patch_artist=True)
+        # for box in bp["boxes"]:
+        #     box.set( facecolor='gray')
+        # for whisker in ax[i]["whiskers"]:
+        #     whisker.set(color='orange', linewidth=2)
+        # for cap in ax[i]["caps"]:
+        #     cap.set(color='black', linewidth=2)
+        # for median in ax[i]["medians"]:
+        #     median.set(color='white', linewidth=2)
+        # for flier in ax[i]["fliers"]:
+        #     flier.set(marker='o', color='red')
         
     plt.show()
+
+def main():
+    stockdf = pd.read_csv('../data/all_ticker_data.csv', index_col=0, parse_dates=True)
+    years = [2010,2015,2020,2021]   
+    plot_boxplots(stockdf, years)
 
         
     
