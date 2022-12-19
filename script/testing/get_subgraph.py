@@ -39,7 +39,7 @@ def get_list_clusters(clusters, corr_df):
             for z in sub_clusters[i]:
                 if z != y:
                     G.add_edge(z,y, weight=corr_df[y,z])
-    list_of_graphs.append(G)
+        list_of_graphs.append(G)
     return list_of_graphs
 
 
@@ -74,16 +74,12 @@ def main():
     # x = get_list_clusters(clusters, corr_df)
     
     years, min_year, max_year = nc.get_data()
-    for i in tqdm(range(min_year,max_year+1), leave=False):
-        corr_df = nc.get_corr_from_year(i,years,min_year)
-        clusters = get_clusters
+    for year in tqdm(range(min_year,max_year+1), leave=False):
+        corr_df = nc.get_corr_from_year(2021,years,min_year)
+        clusters = nc.read_affinity_propagation_from_year(2021)
         x = get_list_clusters(clusters, corr_df)
-        with open(f'../../data/clustered_graphs/clustered_{i}.pkl', 'wb') as f:
+        with open(f'../../data/clustered_graphs/clustered_{year}', 'wb') as f:
             pkl.dump(x, f)
-        
-        
-        
-    print('hello')
     
 
 if __name__ == '__main__':

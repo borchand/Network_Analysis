@@ -83,6 +83,14 @@ def read_affinity_propagation_from_year(year, debug=False):
  
     return affinity_propagation
 
+def read_yearly_clusters(year, debug=False):
+    if debug: print('Reading affinity propagation...')
+    # open file where affinity propagation will be read
+    with open(f'../../data/clustered_graphs/clustered_{year}', 'rb') as cluster_file:
+        # get affinity propagation
+        cluster_years = pickle.load(cluster_file)
+ 
+    return cluster_years
 
 def main():
     df_years, min_year, max_year = get_data(debug=True)
