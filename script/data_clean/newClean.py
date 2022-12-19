@@ -3,6 +3,9 @@ from sys import platform
 
 import numpy as np
 import pandas as pd
+import networkx as nx
+import sklearn.cluster as cluster
+import pickle
 
 # set working directory to current directory
 if platform == "darwin" or platform == "linux":
@@ -14,7 +17,9 @@ else:
     os.chdir(dir)
 
 
-def get_data():
+def get_data(debug=False):
+    if debug: print('Reading data...')
+    
     df = pd.read_csv('../../data/all_ticker_data.csv', index_col=0, parse_dates=True)
     
     min_year = df.index.min().year
@@ -25,7 +30,9 @@ def get_data():
     return df_years, min_year, max_year
 
 
-def get_corr_from_year(year, df_years, min_year, to_numpy=True):
+def get_corr_from_year(year, df_years, min_year, to_numpy=True, debug=False):
+    if debug: print('Spliting data in years...')
+    
     year_data = df_years[year - min_year]
 
     # remove tickers that don't have any variation during the year
@@ -46,13 +53,48 @@ def get_corr_from_year(year, df_years, min_year, to_numpy=True):
 
     return corr_df.to_numpy() if to_numpy else corr_df
 
+def save_affinity_propagation_from_year(corr_df, year, debug=False):
+    if debug: print('Create affinity propagation...')
+    
+    # create graph from correlation matrix
+    G = nx.from_numpy_matrix(corr_df)
+    
+    # convert graph to scipy sparse matrix
+    A = nx.to_scipy_sparse_array(G)
+    
+    # create affinity propagation from sparse matrix
+    clusters = cluster.AffinityPropagation().fit(A)
+    
+    if debug: print('Save affinity propagation...')
+    
+    # open file where affinity propagation will be saved
+    with open('../../Data/affinity_propagation_'+str(year), 'wb') as affinity_propagation_file:
+        # save affinity propagation
+        pickle.dump(clusters, affinity_propagation_file)
+    
+    return clusters
+
+def read_affinity_propagation_from_year(year, debug=False):
+    if debug: print('Reading affinity propagation...')
+    # open file where affinity propagation will be read
+    with open('../../Data/affinity_propagation_'+str(year), 'rb') as affinity_propagation_file:
+        # get affinity propagation
+        affinity_propagation = pickle.load(affinity_propagation_file)
+ 
+    return affinity_propagation
+
 
 def main():
-    df_years, min_year, max_year = get_data()
+    df_years, min_year, max_year = get_data(debug=True)
 
-    corr_df = get_corr_from_year(2020, df_years, min_year)
+    corr_df = get_corr_from_year(2021, df_years, min_year, debug=True)
     
     print(corr_df.shape)
+    
+    save_affinity_propagation_from_year(corr_df, 2021, debug=True)
+    
+    read_affinity_propagation_from_year(2021)
+    
 
 
 if __name__ == '__main__':
