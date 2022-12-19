@@ -6,7 +6,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-corr_, total_sum, dataframes_ = split_into_years(one_hot_where=True)
+corr_, total_sum, dataframes_ = split_into_years(cor_edge_weight=True)
 
 
 #nx matrix to graph
