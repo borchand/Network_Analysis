@@ -35,12 +35,13 @@ def get_corr_from_year(year, df_years, min_year, to_numpy=True):
 
     # convert price data to log returns
     log_returns = np.log(year_data).diff()[1:]
+    
+    return_variation = np.var(log_returns, axis=0).astype('float16')
+    log_returns = log_returns[return_variation[return_variation > 0].index]
 
     # normalize log returns
     log_returns = (log_returns - log_returns.mean()) / log_returns.std()
 
-    return_variation = np.var(log_returns, axis=0).astype('float16')
-    log_returns = year_data[return_variation[return_variation > 0].index]
 
     corr_df = log_returns.corr()
 
