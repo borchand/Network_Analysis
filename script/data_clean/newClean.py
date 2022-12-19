@@ -50,7 +50,8 @@ def get_corr_from_year(year, df_years, min_year, to_numpy=True, debug=False):
     # normalize log returns
     log_returns = (log_returns - log_returns.mean()) / log_returns.std()
 
-
+    # drop nan log returns
+    log_returns = log_returns.dropna(axis=1, how='any')
     corr_df = log_returns.corr()
 
     return corr_df.to_numpy() if to_numpy else corr_df
