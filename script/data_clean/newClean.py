@@ -6,6 +6,7 @@ import pandas as pd
 import networkx as nx
 import sklearn.cluster as cluster
 import pickle
+from tqdm import tqdm
 
 # set working directory to current directory
 if platform == "darwin" or platform == "linux":
@@ -42,12 +43,13 @@ def get_corr_from_year(year, df_years, min_year, to_numpy=True, debug=False):
 
     # convert price data to log returns
     log_returns = np.log(year_data).diff()[1:]
+    
+    return_variation = np.var(log_returns, axis=0).astype('float16')
+    log_returns = log_returns[return_variation[return_variation > 0].index]
 
     # normalize log returns
     log_returns = (log_returns - log_returns.mean()) / log_returns.std()
 
-    return_variation = np.var(log_returns, axis=0).astype('float16')
-    log_returns = year_data[return_variation[return_variation > 0].index]
 
     corr_df = log_returns.corr()
 
@@ -98,10 +100,11 @@ def main():
     corr_df = get_corr_from_year(2021, df_years, min_year, debug=True)
     
     print(corr_df.shape)
+    for year in tqdm(range(min_year, max_year+1)):
+
+        save_affinity_propagation_from_year(corr_df, year)
     
-    save_affinity_propagation_from_year(corr_df, 2021, debug=True)
-    
-    read_affinity_propagation_from_year(2021)
+    affinity_propagation = read_affinity_propagation_from_year(2021, debug=True)
     
 
 
