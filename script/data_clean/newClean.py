@@ -30,6 +30,37 @@ def get_data(debug=False):
 
     return df_years, min_year, max_year
 
+def get_list_clusters(clusters, corr_df):
+    
+    clusters_important = clusters.cluster_centers_indices_
+    labels = clusters.labels_
+    list_of_graphs = []
+
+    sub_clusters = []
+    sub_corr = []
+    for y in range(len(clusters_important)+1):
+        list_of_nodes = []
+        list_of_corr = []
+        for i in np.argwhere(labels == y):
+            list_of_corr.append(corr_df[i, y][0])
+            list_of_nodes.append(i[0])
+        sub_clusters.append(list_of_nodes)
+        sub_corr.append(list_of_corr)
+
+        
+    for i in tqdm(range(len(clusters_important)),leave=False):
+        main_node = clusters_important[i]
+        G = nx.empty_graph()
+        G.add_node(main_node)
+        for y in range(len(sub_clusters[i])):
+            if main_node != sub_clusters[i][y]:
+                G.add_edge(main_node, sub_clusters[i][y], weight=sub_corr[i][y])
+        for y in sub_clusters[i]:
+            for z in sub_clusters[i]:
+                if z != y:
+                    G.add_edge(z,y, weight=corr_df[y,z])
+        list_of_graphs.append(G)
+    return list_of_graphs
 
 def get_corr_from_year(year, df_years, min_year, to_numpy=True, debug=False):
     if debug: print('Spliting data in years...')
@@ -76,6 +107,12 @@ def save_affinity_propagation_from_year(corr_df, year, debug=False):
         pickle.dump(clusters, affinity_propagation_file)
     
     return clusters
+
+def save_clusters_years_list(year,corr_df, clusters,debug=False):
+    if debug: print('Save affinity propagation...')
+    x = get_list_clusters(clusters, corr_df)
+    with open(f'../../data/clustered_graphs/clustered_{year}', 'wb') as f:
+        pickle.dump(x, f)
 
 def read_affinity_propagation_from_year(year, debug=False):
     if debug: print('Reading affinity propagation...')
