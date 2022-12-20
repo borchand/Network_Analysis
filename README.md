@@ -9,3 +9,5 @@ Download dataset from [here](https://www.kaggle.com/datasets/paultimothymooney/s
 
 ## Update all_data.csv and stockdf.csv
 - Run ```clean.py t```
+
+<img src="yearly_change.gif" alt="yearly_change" width="600"/>
