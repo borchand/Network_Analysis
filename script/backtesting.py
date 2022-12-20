@@ -17,6 +17,12 @@ def baseline_backtest(year, data, pct_returns=False):
     ----------
     year : int
         year to backtest
+    
+    data : list
+        list of dataframes with adj close data for all tickers, one for each year
+
+    pct_returns : bool
+        whether to return pct returns or log returns. Default is False
 
     Returns
     -------
@@ -34,7 +40,7 @@ def baseline_backtest(year, data, pct_returns=False):
         pct_returns = pct_returns.fillna(0)
         pct_returns = (pct_returns + 1).cumprod()
         pct_returns = (pct_returns - 1).mean(axis=1)
-        return pct_returns - 1
+        return pct_returns
 
     log_returns = (np.log(year_data) - np.log(year_data.shift(1)))[1:]
     log_returns = log_returns.fillna(0)
