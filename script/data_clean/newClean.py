@@ -1,11 +1,11 @@
 import os
+import pickle
 from sys import platform
 
+import networkx as nx
 import numpy as np
 import pandas as pd
-import networkx as nx
 import sklearn.cluster as cluster
-import pickle
 from tqdm import tqdm
 
 # set working directory to current directory
@@ -34,27 +34,23 @@ def get_data(debug=False):
 def get_corr_from_year(year, df_years, min_year, to_numpy=True, debug=False):
     if debug: print('Spliting data in years...')
     
+    # get data from year
     year_data = df_years[year - min_year]
-
-    # remove tickers that don't have any variation during the year
-
-    # drop tickers that don't have data for the year
-    year_data = year_data.dropna(axis=1, how='any')
 
     # convert price data to log returns
     log_returns = np.log(year_data).diff()[1:]
-    
-    return_variation = np.var(log_returns, axis=0).astype('float16')
-    log_returns = log_returns[return_variation[return_variation > 0].index]
 
     # normalize log returns
     log_returns = (log_returns - log_returns.mean()) / log_returns.std()
 
     # drop nan log returns
     log_returns = log_returns.dropna(axis=1, how='any')
+
+    # get correlation matrix
     corr_df = log_returns.corr()
 
     return corr_df.to_numpy() if to_numpy else corr_df
+
 
 def save_affinity_propagation_from_year(corr_df, year, debug=False):
     if debug: print('Create affinity propagation...')
@@ -77,6 +73,7 @@ def save_affinity_propagation_from_year(corr_df, year, debug=False):
     
     return clusters
 
+
 def read_affinity_propagation_from_year(year, debug=False):
     if debug: print('Reading affinity propagation...')
     # open file where affinity propagation will be read
@@ -86,6 +83,7 @@ def read_affinity_propagation_from_year(year, debug=False):
  
     return affinity_propagation
 
+
 def read_yearly_clusters(year, debug=False):
     if debug: print('Reading affinity propagation...')
     # open file where affinity propagation will be read
@@ -94,6 +92,7 @@ def read_yearly_clusters(year, debug=False):
         cluster_years = pickle.load(cluster_file)
  
     return cluster_years
+
 
 def main():
     df_years, min_year, max_year = get_data(debug=True)
@@ -106,7 +105,6 @@ def main():
         save_affinity_propagation_from_year(corr_df, year)
     
     affinity_propagation = read_affinity_propagation_from_year(2021, debug=True)
-    
 
 
 if __name__ == '__main__':
