@@ -102,7 +102,7 @@ def save_affinity_propagation_from_year(corr_df, year, debug=False):
     if debug: print('Save affinity propagation...')
     
     # open file where affinity propagation will be saved
-    with open('../../Data/affinity_propagation_'+str(year), 'wb') as affinity_propagation_file:
+    with open('../../Data/Affinity_propagation/affinity_propagation_'+str(year), 'wb') as affinity_propagation_file:
         # save affinity propagation
         pickle.dump(clusters, affinity_propagation_file)
     
@@ -117,7 +117,7 @@ def save_clusters_years_list(year,corr_df, clusters,debug=False):
 def read_affinity_propagation_from_year(year, debug=False):
     if debug: print('Reading affinity propagation...')
     # open file where affinity propagation will be read
-    with open('../../Data/affinity_propagation_'+str(year), 'rb') as affinity_propagation_file:
+    with open('../../Data/Affinity_propagation/affinity_propagation_'+str(year), 'rb') as affinity_propagation_file:
         # get affinity propagation
         affinity_propagation = pickle.load(affinity_propagation_file)
  
