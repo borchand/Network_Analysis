@@ -106,7 +106,7 @@ def save_affinity_propagation_from_year(corr_df, year, debug=False):
     return clusters
 
 
-def save_clusters_years_list(year,corr_df, clusters,debug=False):
+def save_clusters_years_list(corr_df, year, clusters,debug=False):
     if debug: print('Save affinity propagation...')
     x = get_list_clusters(clusters, corr_df)
     with open(f'../../data/clustered_graphs/clustered_{year}', 'wb') as f:
@@ -141,7 +141,8 @@ def main():
     print(corr_df.shape)
     for year in tqdm(range(min_year, max_year+1)):
 
-        save_affinity_propagation_from_year(corr_df, year)
+        clusters = save_affinity_propagation_from_year(corr_df, year)
+        save_clusters_years_list(corr_df, year, clusters)
     
     affinity_propagation = read_affinity_propagation_from_year(2021, debug=True)
 
