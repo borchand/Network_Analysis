@@ -20,8 +20,17 @@ else:
 
 def get_data(debug=False):
     if debug: print('Reading data...')
+    import hashlib
+    with open('../../data/all_ticker_data.csv', 'rb') as f:
+        data = f.read()
+        sha = hashlib.sha256(data).hexdigest()
     
-    df = pd.read_csv('../../data/all_ticker_data.csv', index_col=0, parse_dates=True)
+    if sha == '58779f582cc6746806591c2422ce4c1db27e11960ab12dfe8f59914feb1ccf1f':
+        df = pd.read_csv('../../data/all_ticker_data.csv', index_col=0, parse_dates=True)
+    
+    else:
+        print('Data is corrupted, please download again')
+        return
     
     min_year = df.index.min().year
     max_year = df.index.max().year
