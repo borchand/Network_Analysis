@@ -145,16 +145,11 @@ def read_yearly_clusters(year, debug=False):
 def main():
     df_years, min_year, max_year = get_data(debug=True)
 
-    corr_df = get_corr_from_year(2021, df_years, min_year, debug=True)
-    
-    print(corr_df.shape)
     for year in tqdm(range(min_year, max_year+1)):
 
+        corr_df = get_corr_from_year(year, df_years, min_year)
         clusters = save_affinity_propagation_from_year(corr_df, year)
         save_clusters_years_list(corr_df, year, clusters)
-    
-    affinity_propagation = read_affinity_propagation_from_year(2021, debug=True)
-
 
 if __name__ == '__main__':
     main()
