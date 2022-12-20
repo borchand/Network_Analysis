@@ -10,6 +10,7 @@ import newClean as nc
 import pickle as pkl
 from tqdm import tqdm
 
+
 def get_list_clusters(clusters, corr_df):
     
     clusters_important = clusters.cluster_centers_indices_
@@ -77,9 +78,9 @@ def main():
     # for year in tqdm(range(min_year,max_year+1), leave=False):
     #     corr_df = nc.get_corr_from_year(2021,years,min_year)
     #     clusters = nc.read_affinity_propagation_from_year(2021)
-    #     x = get_list_clusters(clusters, corr_df)
-    #     with open(f'../../data/clustered_graphs/clustered_{year}', 'wb') as f:
-    #         pkl.dump(x, f)
+    x = get_list_clusters(clusters, corr_df)
+    with open(f'../../data/clustered_graphs/clustered_{year}', 'wb') as f:
+        pkl.dump(x, f)
     x = nc.read_yearly_clusters(2021)
     nx.draw(x[0])
     plt.show()
