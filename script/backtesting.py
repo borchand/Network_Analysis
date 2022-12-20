@@ -34,7 +34,7 @@ def baseline_backtest(year, data, pct_returns=False):
         pct_returns = pct_returns.fillna(0)
         pct_returns = (pct_returns + 1).cumprod()
         pct_returns = (pct_returns - 1).mean(axis=1)
-        return pct_returns - 1
+        return pct_returns
 
     log_returns = (np.log(year_data) - np.log(year_data.shift(1)))[1:]
     log_returns = log_returns.fillna(0)
