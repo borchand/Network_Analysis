@@ -108,7 +108,7 @@ def current_flow_betweenness_centrality(clusters_list, stock_df):
     
 def main():
     df_years, min_year, max_year = nc.get_data()
-    year = 2020
+    year = 2019
     tickers_in_cluster, clusters_list, affinity_prop, stock_df = get_indecies_of_labels(year, df_years)
 
     closeness = closeness_centrality(clusters_list, stock_df)
@@ -116,21 +116,28 @@ def main():
     page_rank = page_rank_top_node(tickers_in_cluster,clusters_list, affinity_prop, stock_df)
     eigen_vector = eigenvector_centrality_top_node(tickers_in_cluster,clusters_list, affinity_prop, stock_df)
     
+    
+    second_year = 2020
     sns.set_style('darkgrid')
-    baseline = bt.baseline_backtest(2021, pct_returns=True)
+    
+    
+    baseline = bt.baseline_backtest(second_year, pct_returns=True)
     plt.plot(baseline, label='Baseline', color='black', linewidth=2)
     
-    closeness = bt.backtest(2021, df_years, closeness, pct_returns=True)
+    closeness = bt.backtest(second_year, df_years, closeness, pct_returns=True)
     plt.plot(closeness, label='Closeness', color='red', linewidth=2)
     
-    current_flow = bt.backtest(2021, df_years, current_flow, pct_returns=True)
+    current_flow = bt.backtest(second_year, df_years, current_flow, pct_returns=True)
     plt.plot(current_flow, label='Current Flow', color='blue', linewidth=2)
     
-    page_rank =bt.backtest(2021, df_years, page_rank, pct_returns=True)
+    page_rank =bt.backtest(second_year, df_years, page_rank, pct_returns=True)
     plt.plot(page_rank, label='Page Rank', color='green', linewidth=2)
     
-    eigen_vector =bt.backtest(2021, df_years, eigen_vector, pct_returns=True)
+    eigen_vector =bt.backtest(second_year, df_years, eigen_vector, pct_returns=True)
     plt.plot(eigen_vector, label='Eigen Vector', color='orange', linewidth=2)
+    
+    affinity_prop = bt.backtest(second_year, df_years, df_years[15].columns[affinity_prop.cluster_centers_indices_], pct_returns=True)
+    plt.plot(affinity_prop, label='Affinity Propagation', color='cyan', linewidth=2)
     
     plt.legend()
     plt.show()
