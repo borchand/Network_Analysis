@@ -25,7 +25,7 @@ def get_data(debug=False):
         data = f.read()
         sha = hashlib.sha256(data).hexdigest()
     
-    if sha == '58779f582cc6746806591c2422ce4c1db27e11960ab12dfe8f59914feb1ccf1f':
+    if sha == '7a852906a443e0ca99e9654290457674fd4dfc3d1a795313c92c2bf8cb3975d1':
         df = pd.read_csv('../../data/all_ticker_data.csv', index_col=0, parse_dates=True)
     
     else:
