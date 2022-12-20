@@ -7,13 +7,11 @@ from data_clean.newClean import get_data
 
 MIN_YEAR = 2005
 MAX_YEAR = 2021
-SNP500_DF = pd.DataFrame()
-SNP500_DF["snp500"] = yf.download('^GSPC', start=f'{MIN_YEAR}-01-01', end=f'{MAX_YEAR}-12-31', progress=False)["Adj Close"]
 
 
-def baseline_backtest(year, pct_returns=False):
+def baseline_backtest(year, data, pct_returns=False):
     """
-    Backtest the S&P 500 on a given year
+    Backtest for a equal weight portfolio in a given year for all tickers
 
     Parameters
     ----------
@@ -22,31 +20,33 @@ def baseline_backtest(year, pct_returns=False):
 
     Returns
     -------
-    float
-        snp500 log returns for given year
+    pandas.Series
+        Portfolio returns for given year
     """
     if year < MIN_YEAR or year > MAX_YEAR:
         raise ValueError(f"year must be between {MIN_YEAR} and {MAX_YEAR}")
 
-    year_data = SNP500_DF.loc[f'{year}-01-01':f'{year}-12-31']
-    year_data = year_data.fillna(method='ffill')
+    year_data = data[year - MIN_YEAR]
+    year_data = year_data.dropna(axis=1, how='any')
 
     if pct_returns:
-        snp_returns = year_data.pct_change()[1:]
-        snp_returns = snp_returns.fillna(0)
-        snp_returns = (snp_returns + 1).cumprod()
-        return snp_returns["snp500"] - 1
+        pct_returns = year_data.pct_change()[1:]
+        pct_returns = pct_returns.fillna(0)
+        pct_returns = (pct_returns + 1).cumprod()
+        pct_returns = (pct_returns - 1).mean(axis=1)
+        return pct_returns - 1
 
-    snp_returns = (np.log(year_data) - np.log(year_data.shift(1)))[1:]
-    snp_returns = snp_returns.fillna(0)
-    snp_returns = snp_returns.cumsum()
+    log_returns = (np.log(year_data) - np.log(year_data.shift(1)))[1:]
+    log_returns = log_returns.fillna(0)
+    log_returns = log_returns.cumsum()
+    log_returns = log_returns.mean(axis=1)
 
-    return snp_returns["snp500"]
+    return log_returns
 
 
 def backtest(year, data, tickers, pct_returns=False):
     """
-    Backtest the S&P 500 on a given year
+    Backtest for a equal weight portfolio in a given year for specific tickers
 
     Parameters
     ----------
@@ -64,8 +64,8 @@ def backtest(year, data, tickers, pct_returns=False):
 
     Returns
     -------
-    float
-        snp500 returns for given year
+    pandas.Series
+        Portfolio returns for given year
     """
     if year < MIN_YEAR or year > MAX_YEAR:
         raise ValueError(f"year must be between {MIN_YEAR} and {MAX_YEAR}")
