@@ -1,11 +1,13 @@
+import os
 import pickle
-import numpy as np
-import networkx as nx
 import sys
-import matplotlib.pyplot as plt
 # set working directory to current directory
 from sys import platform
-import os
+
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+import pandas as pd
 import seaborn as sns
 
 if platform == "darwin" or platform == "linux":
@@ -18,12 +20,14 @@ else:
 
 sys.path.append('../data_clean/')
 import newClean as nc
+
 sys.path.append('../')
 import backtesting as bt
 
-def get_indecies_of_labels(year, df_years):
-    affinity_prop = nc.read_affinity_propagation_from_year(year)
-    clusters_list = nc.read_yearly_clusters(year)
+
+def get_indecies_of_labels(year, df_years, abs=False):
+    affinity_prop = nc.read_affinity_propagation_from_year(year, abs=abs)
+    clusters_list = nc.read_yearly_clusters(year, abs=abs)
     for i in range(len(df_years)):
         if df_years[i].index.min().year == year:
             stock_df = df_years[i]
@@ -105,11 +109,10 @@ def current_flow_betweenness_centrality(clusters_list, stock_df):
 
     return tickers
 
-def centrality_all(year, df_years, min_year):
-    
+def centrality_all(year, df_years, min_year, abs=False):
     second_year = year+1
         
-    tickers_in_cluster, clusters_list, affinity_prop, stock_df = get_indecies_of_labels(year, df_years)
+    tickers_in_cluster, clusters_list, affinity_prop, stock_df = get_indecies_of_labels(year, df_years, abs=abs)
     
     closeness = closeness_centrality(clusters_list, stock_df)
     current_flow = current_flow_betweenness_centrality(clusters_list, stock_df) 
@@ -133,13 +136,11 @@ def centrality_all(year, df_years, min_year):
     
     return baseline, page_rank, affinity_prop
     
-def plot_centrality_backtest(year, df_years, min_year):
+def plot_centrality_backtest(year, df_years, min_year, abs=False):
     
-    baseline, page_rank, affinity_prop = centrality_all(year, df_years, min_year)
+    baseline, page_rank, affinity_prop = centrality_all(year, df_years, min_year, abs=abs)
 
-    sns.set_style('darkgrid')
-    
-    
+    sns.set_style('darkgrid')    
     
     plt.plot(baseline, label='Baseline', color='black', linewidth=2)
     
@@ -147,6 +148,9 @@ def plot_centrality_backtest(year, df_years, min_year):
     
     # plt.plot(current_flow, label='Current Flow', color='blue', linewidth=2)
     
+    # set all values that exceed a 10% change from previous day to nan
+    # page_rank = page_rank[page_rank.pct_change() > 0.1]
+
     plt.plot(page_rank, label='Page Rank', color='orange', linewidth=2)
     
     # plt.plot(eigen_vector, label='Eigen Vector', color='orange', linewidth=2)
